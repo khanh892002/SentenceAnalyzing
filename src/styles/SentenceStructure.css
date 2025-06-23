@@ -1,0 +1,36 @@
+.sentence-structure {
+  display: inline-block;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.sentence-part {
+  padding: 5px 10px;
+  border-radius: 4px;
+  background-color: #e9ecef;
+  margin: 2px;
+  transition: all 0.2s ease;
+}
+
+.sentence-part.nested {
+  background-color: #dee2e6;
+  padding: 8px;
+  border: 1px solid #ced4da;
+}
+
+.nested-part {
+  margin: 2px;
+}
+
+.part {
+  padding: 3px 6px;
+  border-radius: 3px;
+  background-color: #f8f9fa;
+  margin: 2px;
+}
+
+.part.text { background-color: #e3f2fd; }
+.part.adjective { background-color: #fff3e0; }
+.part.adverb { background-color: #f3e5f5; }
+.part.object { background-color: #e8f5e9; }
+.part.punctuation { background-color: #ffebee; } 
