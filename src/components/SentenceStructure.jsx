@@ -5,7 +5,7 @@ function SentenceStructure({ data }) {
   // Hàm tính độ sâu tối đa của cấu trúc và lưu kết quả
   const calculateDepths = (part) => {
     if (typeof part !== 'object' || part === null) return { depth: 0, children: {} };
-    
+
     const entries = Object.entries(part);
     if (entries.length === 0) return { depth: 0, children: {} };
 
@@ -27,27 +27,27 @@ function SentenceStructure({ data }) {
     if (typeof part === 'object' && part !== null) {
       const entries = Object.entries(part);
       const currentDepth = depthMap ? depthMap.depth : 0;
-      
+
       return (
-        <span 
-          key={index} 
-          className="sentence-part nested"
+        <span
+          key={index}
+          className="part"
           style={{
+            '--height': depthMap.depth,
             minHeight: `${(depth + currentDepth + 1) * 40}px`,
-            padding: '5px 10px'
           }}
         >
           {entries.map(([key, value], i) => {
             if (typeof value === 'object' && value !== null) {
               const childDepthMap = depthMap ? depthMap.children[key] : null;
               return (
-                <span key={i} className="nested-part">
+                <span key={i} className="part" style={{ '--height': depthMap.depth }}>
                   {renderSentencePart(value, i, depth + 1, childDepthMap)}
                 </span>
               );
             }
             return (
-              <span key={i} className={`part ${key}`}>
+              <span key={i} className={`part ${key}`} style={{ '--height': depthMap.depth }}>
                 {value}
               </span>
             );
@@ -56,23 +56,20 @@ function SentenceStructure({ data }) {
       );
     }
     return (
-      <span key={index} className="sentence-part">
+      <span key={index} className="part" style={{ '--height': depthMap.depth }}>
         {part}
       </span>
     );
   };
 
   // Tính toán depthMap một lần duy nhất khi data thay đổi
-  const depthMaps = useMemo(() => 
-    data.map(part => calculateDepths(part)),
-    [data]
-  );
+  const depthMaps = useMemo(() => data.map(part => calculateDepths(part)), [data]);
 
   return (
     <span className="sentence-structure" style={{
       padding: `${depthMaps.reduce((acc, val) => (acc < (val.depth + 1)) ? val.depth : acc, 0)}px`,
     }}>
-      {data.map((part, index) => 
+      {data.map((part, index) =>
         renderSentencePart(part, index, 0, depthMaps[index])
       )}
     </span>

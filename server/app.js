@@ -18,25 +18,27 @@ function analyzeSentence(sentence) {
   // Example of a complex, nested sentence structure
   return [
     {
-      {"text": "The"},
-      {
-        "adjective" : {
-          "adverb" : "extremely",
-          "text" : "large"
+      "subject": [
+        {
+          "article": "The",
+          "adj": [
+            {
+              "adv": "extremely",
+              "text": "large"
+            },
+            { "punctuation": "," },
+            {
+              "adv": "beautifully",
+              "text": "decorated"
+            }
+          ],
+          "noun": "house"
         }
-      },
-      {"punctuation" : ","},
-      {
-        "adjective" : {
-          "adverb" : "beautifully",
-          "text" : "decorated"
-        }
-      },
-      {"object" : "house"},
-      {"adverb" : "at the end of the street"},
-      {"punctuation" : "."}
-    }
-  ];
+      ]
+    },
+    { "adv": "at the end of the street" },
+    { "punctuation": "." }
+  ]
 }
 
 // Route to receive the sentence and respond with structured JSON

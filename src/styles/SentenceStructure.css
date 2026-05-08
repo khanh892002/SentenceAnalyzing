@@ -4,33 +4,42 @@
   border-radius: 4px;
 }
 
-.sentence-part {
-  padding: 5px 10px;
-  border-radius: 4px;
-  background-color: #e9ecef;
-  margin: 2px;
+.part {
+  padding: calc(var(--height)*2px);
+  border-radius: calc(var(--height)*2px + var(--font-size, 16px));
+  border: 1px solid;
+  background-color: #f8f9fa;
   transition: all 0.2s ease;
 }
 
-.sentence-part.nested {
-  background-color: #dee2e6;
-  padding: 8px;
-  border: 1px solid #ced4da;
+.part.adj {
+  background-color: #fef3c7;
+  color: #78350f;
+  border-color: #fcd34d;
 }
 
-.nested-part {
-  margin: 2px;
+.part.adv {
+  background-color: #e0e7ff;
+  color: #312e81;
+  border-color: #a5b4fc;
 }
 
-.part {
-  padding: 3px 6px;
-  border-radius: 3px;
-  background-color: #f8f9fa;
-  margin: 2px;
+.part.subject {
+  background-color: #dbeafe;
+  color: #1e3a8a;
+  border-color: #93c5fd;
 }
 
-.part.text { background-color: #e3f2fd; }
-.part.adjective { background-color: #fff3e0; }
-.part.adverb { background-color: #f3e5f5; }
-.part.object { background-color: #e8f5e9; }
-.part.punctuation { background-color: #ffebee; } 
+.part.verb {
+  background-color: #fce7f3;
+  color: #831843;
+  border-color: #f9a8d4;
+}
+
+.part.article {
+  background-color: #e8f5e9;
+}
+
+.part.noun {
+  background-color: #e8f5e9;
+}
