@@ -1,79 +1,67 @@
 import { useMemo } from 'react';
 
 function SentenceStructure({ data }) {
-  // data là 1 list các dictionary
-  // Hàm tính độ sâu tối đa của cấu trúc và lưu kết quả
-  const calculateDepths = (part) => {
-    if (typeof part !== 'object' || part === null) return { depth: 0, children: {} };
-
-    const entries = Object.entries(part);
-    if (entries.length === 0) return { depth: 0, children: {} };
-
-    const children = {};
-    let maxDepth = 0;
-
-    entries.forEach(([key, value]) => {
-      if (typeof value === 'object' && value !== null) {
-        const childResult = calculateDepths(value);
-        children[key] = childResult;
-        maxDepth = Math.max(maxDepth, 1 + childResult.depth);
-      }
-    });
-
-    return { depth: maxDepth, children };
+  // Hàm đệ quy tính toán và gán thuộc tính height cho từng node
+  const calculateHeights = (node) => {
+    // Điều kiện dừng: Nếu node không có content (là từ lá)
+    if (!node.content || node.content.length === 0) {
+      node.height = 0;
+      return 0;
+    }
+    const childHeights = node.content.map(child => calculateHeights(child));
+    node.height = 1 + Math.max(...childHeights);
+    return node.height;
   };
 
-  const renderSentencePart = (part, index, depth = 0, depthMap = null) => {
-    if (typeof part === 'object' && part !== null) {
-      const entries = Object.entries(part);
-      const currentDepth = depthMap ? depthMap.depth : 0;
-
+  const renderSentencePart = (node, index) => {
+    // Trường hợp 1: Cụm từ có content (Phrase)
+    if (node.content && node.content.length > 0) {
       return (
-        <span
-          key={index}
-          className="part"
-          style={{
-            '--height': depthMap.depth,
-            minHeight: `${(depth + currentDepth + 1) * 40}px`,
-          }}
+        <span 
+          key={index} 
+          className={`nested-part ${node.role || ''} ${node.error ? 'has-error' : ''}`}
+          style={{ '--h': node.height }}
+          title={node.error || ''}
         >
-          {entries.map(([key, value], i) => {
-            if (typeof value === 'object' && value !== null) {
-              const childDepthMap = depthMap ? depthMap.children[key] : null;
-              return (
-                <span key={i} className="part" style={{ '--height': depthMap.depth }}>
-                  {renderSentencePart(value, i, depth + 1, childDepthMap)}
-                </span>
-              );
-            }
-            return (
-              <span key={i} className={`part ${key}`} style={{ '--height': depthMap.depth }}>
-                {value}
-              </span>
-            );
-          })}
+          {node.role && <span className="role-label">{node.role}</span>}
+          {node.error && <span className="error-icon" title={node.error}>⚠️</span>}
+          {node.content.map((child, i) => renderSentencePart(child, i))}
         </span>
       );
     }
+    
+    // Trường hợp 2: Node lá (word, punctuation, unknown)
     return (
-      <span key={index} className="part" style={{ '--height': depthMap.depth }}>
-        {part}
+      <span 
+        key={index} 
+        className={`part ${node.role || ''} ${node.type === 'unknown' ? 'unknown' : ''} ${node.type === 'punctuation' ? 'punctuation' : ''}`}
+        style={{ '--h': node.height || 0 }}
+        title={node.error || node.role || ''}
+      >
+        {node.role && node.type !== 'punctuation' && node.type !== 'unknown' && (
+          <span className="role-label">{node.role}</span>
+        )}
+        <span className="word-text">{node.text}</span>
       </span>
     );
   };
 
-  // Tính toán depthMap một lần duy nhất khi data thay đổi
-  const depthMaps = useMemo(() => data.map(part => calculateDepths(part)), [data]);
+  // Mutate data để tính height một lần khi data thay đổi
+  const processedData = useMemo(() => {
+    if (!data) return [];
+    // Deep clone để không thay đổi trực tiếp prop data
+    const clonedData = JSON.parse(JSON.stringify(data));
+    clonedData.forEach(part => calculateHeights(part));
+    return clonedData;
+  }, [data]);
 
   return (
-    <span className="sentence-structure" style={{
-      padding: `${depthMaps.reduce((acc, val) => (acc < (val.depth + 1)) ? val.depth : acc, 0)}px`,
-    }}>
-      {data.map((part, index) =>
-        renderSentencePart(part, index, 0, depthMaps[index])
+    <span className="sentence-structure">
+      {processedData.map((part, index) => 
+        renderSentencePart(part, index)
       )}
     </span>
   );
 }
 
-export default SentenceStructure; 
+export default SentenceStructure;

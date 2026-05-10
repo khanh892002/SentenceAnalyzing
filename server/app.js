@@ -15,30 +15,36 @@ app.use(cors());
  * In a real-world case, you might use an NLP library like 'compromise' or 'natural'
  */
 function analyzeSentence(sentence) {
-  // Example of a complex, nested sentence structure
+  // Example of a complex, nested sentence structure using the Node-based AST model
   return [
-    {
-      "subject": [
-        {
-          "article": "The",
-          "adj": [
-            {
-              "adv": "extremely",
-              "text": "large"
-            },
-            { "punctuation": "," },
-            {
-              "adv": "beautifully",
-              "text": "decorated"
-            }
-          ],
-          "noun": "house"
-        }
+    { 
+      "role": "np",
+      "type": "phrase",
+      "content": [
+        { "role": "det", "type": "word", "text": "The" },
+        { 
+          "role": "adj", 
+          "type": "phrase",
+          "content": [
+            { "role": "adv", "type": "word", "text": "extremely" },
+            { "role": "adj", "type": "word", "text": "large" }
+          ]
+        },
+        { "role": "punct", "type": "punctuation", "text": "," },
+        { 
+          "role": "adj", 
+          "type": "phrase",
+          "content": [
+            { "role": "adv", "type": "word", "text": "beautifully" },
+            { "role": "adj", "type": "word", "text": "decorated" }
+          ]
+        },
+        { "role": "noun", "type": "word", "text": "house" }
       ]
     },
-    { "adv": "at the end of the street" },
-    { "punctuation": "." }
-  ]
+    { "role": "punct", "type": "punctuation", "text": "." },
+    { "role": "gibberish", "type": "unknown", "text": "asdfghj", "error": "Unknown word" }
+  ];
 }
 
 // Route to receive the sentence and respond with structured JSON

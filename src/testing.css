@@ -2,77 +2,109 @@
 	max-width: 800px;
 	margin: 0 auto;
 	padding: 20px;
-  }
-  .input-container {
+}
+.input-container {
 	display: flex;
 	gap: 10px;
 	margin-bottom: 20px;
-  }
-  .sentence-input {
+}
+.sentence-input {
 	flex: 1;
 	padding: 10px;
 	font-size: 16px;
 	border: 1px solid #ccc;
 	border-radius: 4px;
-  }
-  .analyze-button {
+}
+.analyze-button {
 	padding: 10px 20px;
 	background-color: #007bff;
 	color: white;
 	border: none;
 	border-radius: 4px;
 	cursor: pointer;
-  }
-  .analyze-button:hover {
+}
+.analyze-button:hover {
 	background-color: #0056b3;
-  }
-  .loading {
+}
+.loading {
 	text-align: center;
 	margin: 20px 0;
 	color: #666;
-  }
-  .error {
+}
+.error {
 	color: red;
 	margin: 10px 0;
-  }
-  .result-container {
+}
+.result-container {
 	margin-top: 20px;
 	padding: 20px;
 	border: 1px solid #ddd;
 	border-radius: 4px;
-  }
-  .sentence-structure {
+}
+.sentence-structure {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 5px;
 	padding: 10px;
 	background-color: #f8f9fa;
 	border-radius: 4px;
-  }
-  .sentence-part {
-	padding: 5px 10px;
-	border-radius: 4px;
-	background-color: #e9ecef;
+	align-items: flex-start;
+}
+.nested-part {
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
 	margin: 2px;
-  }
-  .sentence-part.nested {
-	background-color: #dee2e6;
-	padding: 8px;
+	/* Extra top padding for the absolute label */
+	padding: calc(var(--h) * 4px + 15px) 8px 5px 8px;
+	border-radius: calc(var(--h) * 2px + 4px);
+	background-color: hsl(210, 50%, calc(95% - var(--h) * 5%));
 	border: 1px solid #ced4da;
-  }
-  .nested-part {
-	display: inline-block;
-	margin: 2px;
-  }
-  .part {
-	display: inline-block;
+	position: relative;
+	gap: 4px;
+}
+.part {
+	display: inline-flex;
+	flex-direction: column;
+	align-items: center;
 	padding: 3px 6px;
-	border-radius: 3px;
-	background-color: #f8f9fa;
+	border-radius: 4px;
+	background-color: #ffffff;
 	margin: 2px;
-  }
-  .part.text { background-color: #e3f2fd; }
-  .part.adjective { background-color: #fff3e0; }
-  .part.adverb { background-color: #f3e5f5; }
-  .part.object { background-color: #e8f5e9; }
-  .part.punctuation { background-color: #ffebee; }
+	border: 1px solid #e9ecef;
+	position: relative;
+}
+.role-label {
+	font-size: 0.65em;
+	color: #6c757d;
+	font-weight: bold;
+	text-transform: uppercase;
+	margin-bottom: 2px;
+}
+.nested-part > .role-label {
+	position: absolute;
+	top: 2px;
+	left: 6px;
+}
+.word-text {
+	font-size: 1em;
+}
+.part.punctuation { 
+	background-color: transparent; 
+	border: none;
+	padding: 0 2px;
+	align-self: flex-end;
+}
+.part.unknown {
+	text-decoration: underline wavy red;
+	background-color: #fff0f0;
+}
+.has-error {
+	border-color: red;
+}
+.error-icon {
+	position: absolute;
+	top: -8px;
+	right: -8px;
+	font-size: 12px;
+}
