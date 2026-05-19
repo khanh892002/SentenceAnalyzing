@@ -10,7 +10,8 @@ export const analyzeSentence = async (sentence) => {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to analyze sentence');
+    const errorData = await response.json();
+    throw new Error(`Failed to analyze sentence: ${errorData.error}`);
   }
 
   return response.json();

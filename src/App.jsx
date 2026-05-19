@@ -4,7 +4,7 @@ import './App.css';
 function App() {
   return (
     <div className="container">
-      <h1>Sentence Structure Analyzer</h1>
+      <h2>Sentence Structure Analyzer</h2>
       <SentenceAnalyzer />
     </div>
   );

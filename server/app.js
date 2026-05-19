@@ -14,6 +14,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 app.post('/analyze-sentence', (req, res) => {
+  console.log("Received request to analyze sentence");
   const { sentence } = req.body;
   if (!sentence || sentence.trim() === '') {
     return res.status(400).json({ error: 'Sentence input is required.' });

@@ -17,8 +17,8 @@ function SentenceStructure({ data }) {
     // Trường hợp 1: Cụm từ có content (Phrase)
     if (node.content && node.content.length > 0) {
       return (
-        <span 
-          key={index} 
+        <span
+          key={index}
           className={`nested-part ${node.role || ''} ${node.error ? 'has-error' : ''}`}
           style={{ '--h': node.height }}
           title={node.error || ''}
@@ -29,11 +29,11 @@ function SentenceStructure({ data }) {
         </span>
       );
     }
-    
+
     // Trường hợp 2: Node lá (word, punctuation, unknown)
     return (
-      <span 
-        key={index} 
+      <span
+        key={index}
         className={`part ${node.role || ''} ${node.type === 'unknown' ? 'unknown' : ''} ${node.type === 'punctuation' ? 'punctuation' : ''}`}
         style={{ '--h': node.height || 0 }}
         title={node.error || node.role || ''}
@@ -57,9 +57,7 @@ function SentenceStructure({ data }) {
 
   return (
     <span className="sentence-structure">
-      {processedData.map((part, index) => 
-        renderSentencePart(part, index)
-      )}
+      {processedData.map((part, index) => renderSentencePart(part, index))}
     </span>
   );
 }
