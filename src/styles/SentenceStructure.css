@@ -1,45 +1,57 @@
 .sentence-structure {
   display: inline-block;
-  background-color: #f8f9fa;
-  border-radius: 4px;
+  overflow-wrap: anywhere;
+}
+
+/* Khi di chuột vào khu vực container, làm mờ tất cả các part */
+.sentence-structure:hover .part {
+  opacity: 0.3;
+  filter: blur(1px); /* Tùy chọn làm mờ ảo */
+}
+
+/* Giữ nguyên độ sáng/rõ nét cho thẻ part đang bị trỏ chuột và TẤT CẢ các thẻ part con nằm trong nó */
+.sentence-structure .part:hover,
+.sentence-structure .part:hover .part {
+  opacity: 1;
+  filter: blur(0px);
 }
 
 .part {
-  padding: calc(var(--height)*2px);
-  border-radius: calc(var(--height)*2px + var(--font-size, 16px));
+  padding: calc(var(--h)*0.2em) 0.2em;
+  border-radius: calc((var(--h) + 1)*1em);
   border: 1px solid;
   background-color: #f8f9fa;
   transition: all 0.2s ease;
 }
 
-.part.adj {
+.ADJ {
   background-color: #fef3c7;
   color: #78350f;
   border-color: #fcd34d;
 }
 
-.part.adv {
+.ADV {
   background-color: #e0e7ff;
   color: #312e81;
   border-color: #a5b4fc;
 }
 
-.part.subject {
+.subject {
   background-color: #dbeafe;
   color: #1e3a8a;
   border-color: #93c5fd;
 }
 
-.part.verb {
+.VERB {
   background-color: #fce7f3;
   color: #831843;
   border-color: #f9a8d4;
 }
 
-.part.article {
+.article {
   background-color: #e8f5e9;
 }
 
-.part.noun {
+.NOUN {
   background-color: #e8f5e9;
 }

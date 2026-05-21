@@ -1,5 +1,32 @@
 import { useMemo } from 'react';
-
+import '../styles/SentenceStructure.css'
+/* example data = [{
+        "role": "ROOT", "type": "phrase", "pos": "VERB",
+        "content": [
+            {
+                "role": "nsubj", "type": "phrase", "pos": "NOUN",
+                "content": [
+                    {"role": "det", "type": "word", "text": "The", "pos": "DET"},
+                    {"role": "amod","type": "word", "text": "quick","pos": "ADJ"},
+                    {"role": "head","type": "word", "text": "fox", "pos": "NOUN"}
+                ]
+            },
+            {"role": "head", "type": "word", "text": "jumps","pos": "VERB"},
+            {
+                "role": "prep", "type": "phrase","pos": "ADP",
+                "content": [
+                    {"role": "head", "type": "word", "text": "over", "pos": "ADP"},
+                    {"role": "pobj", "type": "phrase","pos": "NOUN",
+                        "content": [
+                            {"role": "det", "type": "word","text": "the","pos": "DET"},
+                            {"role": "amod","type": "word","text": "lazy","pos": "ADJ"},
+                            {"role": "head","type": "word","text": "dog","pos": "NOUN"}
+                        ]
+                    }
+                ]
+            }
+        ]
+    }]*/
 function SentenceStructure({ data }) {
   // Hàm đệ quy tính toán và gán thuộc tính height cho từng node
   const calculateHeights = (node) => {
@@ -19,11 +46,10 @@ function SentenceStructure({ data }) {
       return (
         <span
           key={index}
-          className={`nested-part ${node.role || ''} ${node.error ? 'has-error' : ''}`}
+          className={`part ${node.pos}`}
           style={{ '--h': node.height }}
           title={node.error || ''}
         >
-          {node.role && <span className="role-label">{node.role}</span>}
           {node.error && <span className="error-icon" title={node.error}>⚠️</span>}
           {node.content.map((child, i) => renderSentencePart(child, i))}
         </span>
@@ -34,14 +60,11 @@ function SentenceStructure({ data }) {
     return (
       <span
         key={index}
-        className={`part ${node.role || ''} ${node.type === 'unknown' ? 'unknown' : ''} ${node.type === 'punctuation' ? 'punctuation' : ''}`}
+        className={`part ${node.pos}`}
         style={{ '--h': node.height || 0 }}
         title={node.error || node.role || ''}
       >
-        {node.role && node.type !== 'punctuation' && node.type !== 'unknown' && (
-          <span className="role-label">{node.role}</span>
-        )}
-        <span className="word-text">{node.text}</span>
+        {node.text}
       </span>
     );
   };
@@ -54,9 +77,9 @@ function SentenceStructure({ data }) {
     clonedData.forEach(part => calculateHeights(part));
     return clonedData;
   }, [data]);
-
+  console.log(processedData);
   return (
-    <span className="sentence-structure">
+    <span className="sentence-structure" style={{lineHeight: 1 + 3 / 16 * processedData.reduce((cur, next) => next.height > cur.height ? next : cur, processedData[0]).height}}>
       {processedData.map((part, index) => renderSentencePart(part, index))}
     </span>
   );
