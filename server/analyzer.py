@@ -1,13 +1,19 @@
 import sys
-import json
 import spacy
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+app = FastAPI()
 
 try:
     # Load the English language model
     nlp = spacy.load("en_core_web_sm")
 except OSError:
-    print(json.dumps({"error": "Model en_core_web_sm not found. Please run: python -m spacy download en_core_web_sm"}))
+    print("Model en_core_web_sm not found. Please run: python -m spacy download en_core_web_sm")
     sys.exit(1)
+
+class SentenceRequest(BaseModel):
+    sentence: str
 
 def build_tree(token):
     """
@@ -52,8 +58,12 @@ def build_tree(token):
             
     return node
 
-def analyze_sentence(sentence):
-    doc = nlp(sentence)
+@app.post("/analyze")
+def analyze_sentence(request: SentenceRequest):
+    if not request.sentence or not request.sentence.strip():
+        raise HTTPException(status_code=400, detail="Sentence input is required.")
+        
+    doc = nlp(request.sentence)
     
     results = []
     # Process each sentence found in the input text
@@ -66,12 +76,5 @@ def analyze_sentence(sentence):
     return results
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print(json.dumps({"error": "No sentence provided"}))
-        sys.exit(1)
-        
-    sentence = sys.argv[1]
-    result = analyze_sentence(sentence)
-    
-    # Output JSON string for Node.js to capture via stdout
-    print(json.dumps(result))
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)
