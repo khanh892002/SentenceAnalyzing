@@ -1,12 +1,17 @@
-import SentenceAnalyzer from './components/SentenceAnalyzer';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard';
 import './App.css';
 
 function App() {
   return (
-    <div className="container">
-      <h2>Sentence Structure Analyzer</h2>
-      <SentenceAnalyzer />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Dashboard />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
