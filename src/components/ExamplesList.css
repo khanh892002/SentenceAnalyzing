@@ -1,0 +1,28 @@
+.examples-list {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 15px;
+}
+.examples-label {
+  font-weight: bold;
+  color: #34495e;
+}
+.examples-chips {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.example-chip {
+  background-color: #ecf0f1;
+  border: 1px solid #bdc3c7;
+  padding: 8px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #2c3e50;
+  transition: all 0.2s;
+}
+.example-chip:hover {
+  background-color: #d5dbdb;
+}

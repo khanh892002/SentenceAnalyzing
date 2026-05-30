@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { analyzeSentence } from '../services/sentenceService';
 import SentenceStructure from '../components/SentenceStructure';
+import ExamplesList from '../components/ExamplesList';
 import './Dashboard.css';
 
 function Dashboard() {
@@ -24,11 +25,31 @@ function Dashboard() {
     }
   };
 
+  const handleSelectExample = (exSentence, exResult) => {
+    setSentence(exSentence);
+    if (exResult === "loading") {
+      setLoading(true);
+      setError(null);
+      setResponseJSON(null);
+    } else {
+      setLoading(false);
+      if (exResult === null) {
+        setError('Failed to analyze example sentence.');
+        setResponseJSON(null);
+      } else {
+        setError(null);
+        setResponseJSON(exResult);
+      }
+    }
+  };
+
   return (
     <div className="dashboard">
       <div className="dashboard-header">
         <h2>Sentence Structure Analyzer</h2>
       </div>
+      
+      <ExamplesList onSelectExample={handleSelectExample} />
       
       <div className="analyzer-layout">
         <div className="left-panel">
@@ -53,8 +74,16 @@ function Dashboard() {
               Analysis results will appear here.
             </div>
           )}
-          {loading && <div className="loading">Analyzing...</div>}
-          {responseJSON && (
+          {loading && (
+            <div className="skeleton-container">
+              <div className="skeleton-line short"></div>
+              <div className="skeleton-box"></div>
+              <div className="skeleton-line medium" style={{marginLeft: '20px'}}></div>
+              <div className="skeleton-box" style={{marginLeft: '40px'}}></div>
+              <div className="skeleton-line long" style={{marginLeft: '20px'}}></div>
+            </div>
+          )}
+          {responseJSON && !loading && (
             <div className="result-container">
               <h3>Analysis Result:</h3>
               <div className="tree-scroll-container">
