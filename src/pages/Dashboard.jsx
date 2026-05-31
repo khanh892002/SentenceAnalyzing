@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { analyzeSentence } from '../services/sentenceService';
 import SentenceStructure from '../components/SentenceStructure';
 import ExamplesList from '../components/ExamplesList';
+import PosLegend from '../components/PosLegend';
 import './Dashboard.css';
 
 function Dashboard() {
@@ -49,6 +50,7 @@ function Dashboard() {
         <h2>Sentence Structure Analyzer</h2>
       </div>
       
+      <PosLegend />
       <ExamplesList onSelectExample={handleSelectExample} />
       
       <div className="analyzer-layout">

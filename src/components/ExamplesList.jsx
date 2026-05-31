@@ -22,15 +22,15 @@ function ExamplesList({ onSelectExample }) {
   const handleExampleClick = async (index) => {
     const exampleItem = examples[index];
     if (!exampleItem.example || exampleItem.example.trim() === "") return;
-    
+
     // Set UI to loading state in Dashboard first by passing null result momentarily
     onSelectExample(exampleItem.example, "loading");
-    
+
     // Check if result is empty
     if (!exampleItem.result || exampleItem.result.length === 0) {
       try {
         const result = await analyzeSentence(exampleItem.example);
-        
+
         // Update local state
         const newExamples = [...examples];
         newExamples[index].result = result;
@@ -42,7 +42,7 @@ function ExamplesList({ onSelectExample }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newExamples)
         });
-        
+
         onSelectExample(exampleItem.example, result);
       } catch (err) {
         console.error("Error analyzing example", err);
@@ -61,9 +61,9 @@ function ExamplesList({ onSelectExample }) {
       <span className="examples-label">Try an example:</span>
       <div className="examples-chips">
         {examples.map((item, index) => (
-          <button 
-            key={index} 
-            className="example-chip" 
+          <button
+            key={index}
+            className="example-chip"
             onClick={() => handleExampleClick(index)}
           >
             {item.example.length > 30 ? item.example.substring(0, 30) + '...' : item.example}

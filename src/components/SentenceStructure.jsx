@@ -36,7 +36,7 @@ function SentenceStructure({ data }) {
         key={index}
         className={`part ${node.pos}`}
         style={{ '--h': node.height || 0 }}
-        title={node.error || node.role || ''}
+        title={node.error || node.pos || ''}
       >
         {node.text}
       </span>
@@ -52,8 +52,12 @@ function SentenceStructure({ data }) {
     return clonedData;
   }, [data]);
   console.log(processedData);
+  const maxHeight = processedData.length > 0
+    ? Math.max(...processedData.map(part => part.height || 0))
+    : 0;
+
   return (
-    <span className="sentence-structure" style={{ lineHeight: 1 + 3 / 16 * processedData.reduce((cur, next) => next.height > cur.height ? next : cur, processedData[0]).height }}>
+    <span className="sentence-structure" style={{ lineHeight: `${1.5 + maxHeight * 0.8}em` }}>
       {processedData.map((part, index) => renderSentencePart(part, index))}
     </span>
   );
