@@ -12,15 +12,23 @@ function Dashboard() {
   const [error, setError] = useState(null);
 
   const handleSubmit = async () => {
-    if (!sentence.trim()) return;
+    let finalSentence = sentence.trim();
+    if (!finalSentence) return;
+
+    // Kiểm tra và tự động thêm dấu chấm nếu thiếu ký hiệu kết thúc câu
+    if (!/[.?!…]$/.test(finalSentence)) {
+      finalSentence += '.';
+      setSentence(finalSentence);
+    }
+
     try {
       setLoading(true);
       setError(null);
-      const responseData = await analyzeSentence(sentence);
+      const responseData = await analyzeSentence(finalSentence);
       setResponseJSON(responseData);
     } catch (error) {
       console.error('Error:', error);
-      setError('An error occurred. Please try again later.');
+      setError(error.message || 'An error occurred. Please try again later.');
     } finally {
       setLoading(false);
     }

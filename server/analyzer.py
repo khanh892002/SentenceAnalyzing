@@ -2,6 +2,7 @@ import sys
 import spacy
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from langdetect import detect, LangDetectException
 
 app = FastAPI()
 
@@ -60,16 +61,29 @@ def build_tree(token):
 
 @app.post("/analyze")
 def analyze_sentence(request: SentenceRequest):
-    if not request.sentence or not request.sentence.strip():
+    text = request.sentence
+    if not text or not text.strip():
         raise HTTPException(status_code=400, detail="Sentence input is required.")
         
-    doc = nlp(request.sentence)
+    # Validation 1: Language Detection & Gibberish
+    try:
+        lang = detect(text)
+        if lang != 'en':
+            raise HTTPException(status_code=400, detail=f"Vui lòng nhập câu tiếng Anh (phát hiện ngôn ngữ: {lang}).")
+    except LangDetectException:
+        raise HTTPException(status_code=400, detail="Văn bản vô nghĩa hoặc không thể nhận diện ngôn ngữ.")
+        
+    doc = nlp(text)
     
     results = []
     # Process each sentence found in the input text
     for sent in doc.sents:
-        # Find the root of the dependency tree (main verb)
-        root = sent.root
+        # Validation 2: Fragment / Missing ROOT
+        roots = [token for token in sent if token.dep_ == "ROOT"]
+        if not roots:
+            raise HTTPException(status_code=400, detail="Câu bị ngắt hoặc thiếu động từ chính (ROOT).")
+            
+        root = roots[0]
         tree = build_tree(root)
         results.append(tree)
         

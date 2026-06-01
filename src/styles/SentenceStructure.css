@@ -1,59 +1,136 @@
+:root {
+  /* Semantic Colors */
+  /* Nouns/Pronouns: Blue */
+  --color-noun-bg: #e3f2fd;
+  --color-noun-text: #0d47a1;
+  /* Verbs/Auxiliary: Pink/Red */
+  --color-verb-bg: #ffebee;
+  --color-verb-text: #b71c1c;
+  /* Adjectives: Yellow/Orange */
+  --color-adj-bg: #fff8e1;
+  --color-adj-text: #f57f17;
+  /* Adverbs: Green */
+  --color-adv-bg: #e8f5e9;
+  --color-adv-text: #1b5e20;
+  /* Function words (ADP, DET, CCONJ, SCONJ): Gray/Purple */
+  --color-func-bg: #f3e5f5;
+  --color-func-text: #4a148c;
+  /* Punctuation & Other */
+  --color-punct-bg: #f5f5f5;
+  --color-punct-text: #424242;
+
+  --color-border: #cfd8dc;
+  --color-phrase-bg: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-noun-bg: #1e3a8a;
+    --color-noun-text: #bfdbfe;
+    --color-verb-bg: #7f1d1d;
+    --color-verb-text: #fecaca;
+    --color-adj-bg: #78350f;
+    --color-adj-text: #fde68a;
+    --color-adv-bg: #14532d;
+    --color-adv-text: #bbf7d0;
+    --color-func-bg: #4c1d95;
+    --color-func-text: #ddd6fe;
+    --color-punct-bg: #3f3f46;
+    --color-punct-text: #e4e4e7;
+
+    --color-border: #52525b;
+    --color-phrase-bg: transparent;
+  }
+}
+
 .sentence-structure {
   display: inline-block;
   overflow-wrap: anywhere;
 }
 
-/* Khi di chuột vào khu vực container, làm mờ tất cả các part */
 .sentence-structure:hover .part {
   opacity: 0.3;
   filter: blur(1px);
-  transition: all 0.2s ease;
-  /* Tùy chọn làm mờ ảo */
 }
 
-/* Giữ nguyên độ sáng/rõ nét cho thẻ part đang bị trỏ chuột và TẤT CẢ các thẻ part con nằm trong nó */
 .sentence-structure .part:hover,
 .sentence-structure .part:hover .part {
   opacity: 1;
   filter: blur(0px);
 }
 
+/* Base style for all parts */
 .part {
-  padding: calc((var(--h) + 1)*0.25em) 0.5em;
-  border-radius: calc((var(--h) + 1)*1em);
-  border: 1px solid;
-  background-color: #f8f9fa;
+  padding: calc(var(--h)*0.15em) 0.15em;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
   transition: all 0.2s ease;
+  display: inline-block;
+  margin: 0 2px;
+  line-height: normal;
 }
 
-.ADJ {
-  background-color: #fef3c7;
-  color: #78350f;
-  border-color: #fcd34d;
+/* Phrases only show borders, no background */
+.part.phrase {
+  background-color: var(--color-phrase-bg);
 }
 
-.ADV {
-  background-color: #e0e7ff;
-  color: #312e81;
-  border-color: #a5b4fc;
+/* Leaves have strong background colors */
+.part.leaf {
+  background-color: var(--color-punct-bg);
+  color: var(--color-punct-text);
+  border-color: var(--color-punct-bg);
+  font-weight: 500;
 }
 
-.subject {
-  background-color: #dbeafe;
-  color: #1e3a8a;
-  border-color: #93c5fd;
+/* Mapping UPOS tags to semantic colors */
+.part.leaf.NOUN,
+.part.leaf.PROPN,
+.part.leaf.PRON {
+  background-color: var(--color-noun-bg);
+  color: var(--color-noun-text);
+  border-color: var(--color-noun-bg);
 }
 
-.VERB {
-  background-color: #fce7f3;
-  color: #831843;
-  border-color: #f9a8d4;
+.part.leaf.VERB,
+.part.leaf.AUX {
+  background-color: var(--color-verb-bg);
+  color: var(--color-verb-text);
+  border-color: var(--color-verb-bg);
 }
 
-.article {
-  background-color: #e8f5e9;
+.part.leaf.ADJ {
+  background-color: var(--color-adj-bg);
+  color: var(--color-adj-text);
+  border-color: var(--color-adj-bg);
 }
 
-.NOUN {
-  background-color: #e8f5e9;
+.part.leaf.ADV {
+  background-color: var(--color-adv-bg);
+  color: var(--color-adv-text);
+  border-color: var(--color-adv-bg);
+}
+
+.part.leaf.ADP,
+.part.leaf.DET,
+.part.leaf.CCONJ,
+.part.leaf.SCONJ,
+.part.leaf.PART {
+  background-color: var(--color-func-bg);
+  color: var(--color-func-text);
+  border-color: var(--color-func-bg);
+}
+
+.part.leaf.PUNCT,
+.part.leaf.SYM,
+.part.leaf.NUM,
+.part.leaf.INTJ,
+.part.leaf.X {
+  background-color: var(--color-punct-bg);
+  color: var(--color-punct-text);
+  border-color: var(--color-punct-bg);
+}
+
+.error-icon {
+  margin-right: 4px;
 }

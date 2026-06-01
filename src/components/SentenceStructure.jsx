@@ -20,7 +20,7 @@ function SentenceStructure({ data }) {
       return (
         <span
           key={index}
-          className={`part ${node.pos}`}
+          className={`part phrase ${node.pos}`}
           style={{ '--h': node.height }}
           title={node.error || ''}
         >
@@ -34,7 +34,7 @@ function SentenceStructure({ data }) {
     return (
       <span
         key={index}
-        className={`part ${node.pos}`}
+        className={`part leaf ${node.pos}`}
         style={{ '--h': node.height || 0 }}
         title={node.error || node.pos || ''}
       >

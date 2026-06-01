@@ -11,7 +11,7 @@ export const analyzeSentence = async (sentence) => {
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(`Failed to analyze sentence: ${errorData.error}`);
+    throw new Error(errorData.error || 'Failed to analyze sentence.');
   }
 
   return response.json();
