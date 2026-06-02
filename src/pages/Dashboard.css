@@ -20,7 +20,7 @@
 
 .left-panel {
   color-scheme: dark;
-  flex: 4.5;
+  flex: 3.5;
   display: flex;
   flex-direction: column;
 }
@@ -65,7 +65,7 @@
 }
 
 .right-panel {
-  flex: 4.5;
+  flex: 5.5;
   background: white;
   border: 1px solid #eee;
   border-radius: 8px;
@@ -97,11 +97,17 @@
   animation: pulse 1.5s infinite ease-in-out;
 }
 
-.skeleton-line.short { width: 40%; }
+.skeleton-line.short {
+  width: 40%;
+}
 
-.skeleton-line.medium { width: 70%; }
+.skeleton-line.medium {
+  width: 70%;
+}
 
-.skeleton-line.long { width: 100%; }
+.skeleton-line.long {
+  width: 100%;
+}
 
 .skeleton-box {
   height: 80px;
@@ -112,7 +118,15 @@
 }
 
 @keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
+  0% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.6;
+  }
 }

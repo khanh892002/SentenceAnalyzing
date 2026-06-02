@@ -1,45 +1,44 @@
 :root {
-  /* Semantic Colors */
-  /* Nouns/Pronouns: Blue */
-  --color-noun-bg: #e3f2fd;
-  --color-noun-text: #0d47a1;
-  /* Verbs/Auxiliary: Pink/Red */
-  --color-verb-bg: #ffebee;
-  --color-verb-text: #b71c1c;
-  /* Adjectives: Yellow/Orange */
-  --color-adj-bg: #fff8e1;
-  --color-adj-text: #f57f17;
-  /* Adverbs: Green */
-  --color-adv-bg: #e8f5e9;
-  --color-adv-text: #1b5e20;
-  /* Function words (ADP, DET, CCONJ, SCONJ): Gray/Purple */
-  --color-func-bg: #f3e5f5;
-  --color-func-text: #4a148c;
-  /* Punctuation & Other */
-  --color-punct-bg: #f5f5f5;
-  --color-punct-text: #424242;
+  /* Vibrant Capsule Colors for Leaves (Light Mode) */
+  --color-noun-bg: #4f46e5;
+  --color-noun-text: #ffffff;
+  --color-verb-bg: #e11d48;
+  --color-verb-text: #ffffff;
+  --color-adj-bg: #d97706;
+  --color-adj-text: #ffffff;
+  --color-adv-bg: #059669;
+  --color-adv-text: #ffffff;
+  --color-func-bg: #7c3aed;
+  --color-func-text: #ffffff;
+  --color-punct-bg: #4b5563;
+  --color-punct-text: #ffffff;
 
-  --color-border: #cfd8dc;
-  --color-phrase-bg: transparent;
+  /* Container styles */
+  --color-border: rgba(0, 0, 0, 0.15);
+  --color-phrase-bg: rgba(0, 0, 0, 0.04);
+  --color-phrase-hover-bg: rgba(0, 0, 0, 0.08);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-noun-bg: #1e3a8a;
-    --color-noun-text: #bfdbfe;
-    --color-verb-bg: #7f1d1d;
-    --color-verb-text: #fecaca;
-    --color-adj-bg: #78350f;
-    --color-adj-text: #fde68a;
-    --color-adv-bg: #14532d;
-    --color-adv-text: #bbf7d0;
-    --color-func-bg: #4c1d95;
-    --color-func-text: #ddd6fe;
-    --color-punct-bg: #3f3f46;
-    --color-punct-text: #e4e4e7;
+    /* Vibrant Capsule Colors for Leaves (Dark Mode) - slightly softened */
+    --color-noun-bg: #6366f1;
+    --color-noun-text: #ffffff;
+    --color-verb-bg: #f43f5e;
+    --color-verb-text: #ffffff;
+    --color-adj-bg: #f59e0b;
+    --color-adj-text: #1c1917;
+    --color-adv-bg: #10b981;
+    --color-adv-text: #1c1917;
+    --color-func-bg: #8b5cf6;
+    --color-func-text: #ffffff;
+    --color-punct-bg: #6b7280;
+    --color-punct-text: #ffffff;
 
-    --color-border: #52525b;
-    --color-phrase-bg: transparent;
+    /* Container styles */
+    --color-border: rgba(255, 255, 255, 0.2);
+    --color-phrase-bg: rgba(255, 255, 255, 0.06);
+    --color-phrase-hover-bg: rgba(255, 255, 255, 0.12);
   }
 }
 
@@ -48,39 +47,36 @@
   overflow-wrap: anywhere;
 }
 
-.sentence-structure:hover .part {
-  opacity: 0.3;
-  filter: blur(1px);
-}
-
-.sentence-structure .part:hover,
-.sentence-structure .part:hover .part {
-  opacity: 1;
-  filter: blur(0px);
-}
-
 /* Base style for all parts */
 .part {
   padding: calc(var(--h)*0.15em) 0.15em;
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid var(--color-border);
   transition: all 0.2s ease;
   display: inline-block;
-  margin: 0 2px;
+  margin: 2px;
   line-height: normal;
 }
 
-/* Phrases only show borders, no background */
+/* PHRASES: Transparent stacking backgrounds */
 .part.phrase {
   background-color: var(--color-phrase-bg);
 }
 
-/* Leaves have strong background colors */
+.part.phrase:hover {
+  background-color: var(--color-phrase-hover-bg);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  transform: translateY(-1px);
+}
+
+/* LEAVES (WORDS): Bright capsules */
 .part.leaf {
   background-color: var(--color-punct-bg);
   color: var(--color-punct-text);
-  border-color: var(--color-punct-bg);
+  border-color: transparent;
   font-weight: 500;
+  border-radius: 12px;
+  padding: 4px 8px;
 }
 
 /* Mapping UPOS tags to semantic colors */
@@ -89,26 +85,22 @@
 .part.leaf.PRON {
   background-color: var(--color-noun-bg);
   color: var(--color-noun-text);
-  border-color: var(--color-noun-bg);
 }
 
 .part.leaf.VERB,
 .part.leaf.AUX {
   background-color: var(--color-verb-bg);
   color: var(--color-verb-text);
-  border-color: var(--color-verb-bg);
 }
 
 .part.leaf.ADJ {
   background-color: var(--color-adj-bg);
   color: var(--color-adj-text);
-  border-color: var(--color-adj-bg);
 }
 
 .part.leaf.ADV {
   background-color: var(--color-adv-bg);
   color: var(--color-adv-text);
-  border-color: var(--color-adv-bg);
 }
 
 .part.leaf.ADP,
@@ -118,7 +110,6 @@
 .part.leaf.PART {
   background-color: var(--color-func-bg);
   color: var(--color-func-text);
-  border-color: var(--color-func-bg);
 }
 
 .part.leaf.PUNCT,
@@ -128,7 +119,6 @@
 .part.leaf.X {
   background-color: var(--color-punct-bg);
   color: var(--color-punct-text);
-  border-color: var(--color-punct-bg);
 }
 
 .error-icon {

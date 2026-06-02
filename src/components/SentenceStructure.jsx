@@ -51,7 +51,6 @@ function SentenceStructure({ data }) {
     clonedData.forEach(part => calculateHeights(part));
     return clonedData;
   }, [data]);
-  console.log(processedData);
   const maxHeight = processedData.length > 0
     ? Math.max(...processedData.map(part => part.height || 0))
     : 0;
