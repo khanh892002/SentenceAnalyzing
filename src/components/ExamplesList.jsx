@@ -7,7 +7,7 @@ function ExamplesList({ onSelectExample }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:3000/examples')
+    fetch('/examples.json')
       .then(res => res.json())
       .then(data => {
         setExamples(data);
@@ -35,13 +35,6 @@ function ExamplesList({ onSelectExample }) {
         const newExamples = [...examples];
         newExamples[index].result = result;
         setExamples(newExamples);
-
-        // Update server JSON
-        await fetch('http://localhost:3000/examples', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newExamples)
-        });
 
         onSelectExample(exampleItem.example, result);
       } catch (err) {

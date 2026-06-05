@@ -1,0 +1,26 @@
+[
+  {
+    "example": "The quick brown fox jumps over the lazy dog.",
+    "result": []
+  },
+  {
+    "example": "Artificial intelligence is transforming the world.",
+    "result": []
+  },
+  {
+    "example": "I have said that he is going to the hospital tomorrow.",
+    "result": []
+  },
+  {
+    "example": "If you are going to the party, I will go too.",
+    "result": []
+  },
+  {
+    "example": "To be or not to be, that is the question.",
+    "result": []
+  },
+  {
+    "example": "Do you know where the nearest gas station is?",
+    "result": []
+  }
+]

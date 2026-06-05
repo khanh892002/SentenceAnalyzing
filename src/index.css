@@ -7,6 +7,13 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  color-scheme: light dark;
+  --bg-color: #f9f9f9;
+  --panel-bg: #ffffff;
+  --border-color: #eeeeee;
+  color: #213547;
+  background-color: #ffffff;
 }
 
 a {
@@ -55,10 +62,13 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: dark) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    color: #ffffff;
+    background-color: #242424;
+    --bg-color: #1a1a1a;
+    --panel-bg: #2c2c2c;
+    --border-color: #444444;
   }
 
   a:hover {
@@ -67,5 +77,6 @@ button:focus-visible {
 
   button {
     background-color: #f9f9f9;
+    color: #1a1a1a;
   }
 }

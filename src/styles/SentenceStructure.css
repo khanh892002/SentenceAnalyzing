@@ -124,3 +124,27 @@
 .error-icon {
   margin-right: 4px;
 }
+
+.collapse-toggle {
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--color-punct-text, #7f8c8d);
+  user-select: none;
+  margin-right: 4px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.part.phrase:hover > .collapse-toggle {
+  opacity: 1;
+}
+
+.collapsed-text {
+  font-weight: bold;
+  color: #95a5a6;
+  padding: 0 4px;
+}
+
+.part.phrase {
+  cursor: pointer;
+}

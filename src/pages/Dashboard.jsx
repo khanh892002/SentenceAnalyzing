@@ -1,8 +1,12 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { analyzeSentence } from '../services/sentenceService';
 import SentenceStructure from '../components/SentenceStructure';
 import ExamplesList from '../components/ExamplesList';
 import PosLegend from '../components/PosLegend';
+import { auth, db } from '../config/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 import './Dashboard.css';
 
 function Dashboard() {
@@ -10,6 +14,15 @@ function Dashboard() {
   const [responseJSON, setResponseJSON] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleSubmit = async () => {
     let finalSentence = sentence.trim();
@@ -61,6 +74,67 @@ function Dashboard() {
     }
   };
 
+  const [previewImage, setPreviewImage] = useState(null);
+  const resultRef = useRef(null);
+
+  const handleCopyJSON = () => {
+    if (responseJSON) {
+      navigator.clipboard.writeText(JSON.stringify(responseJSON, null, 2))
+        .then(() => alert('JSON copied to clipboard!'))
+        .catch(err => console.error('Failed to copy JSON:', err));
+    }
+  };
+
+  const handleExportImageClick = async () => {
+    if (resultRef.current) {
+      try {
+        const { toPng } = await import('html-to-image');
+        // Get current color scheme
+        const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const bgColor = isDark ? '#2c2c2c' : '#ffffff';
+        
+        const dataUrl = await toPng(resultRef.current, { backgroundColor: bgColor });
+        setPreviewImage(dataUrl);
+      } catch (err) {
+        console.error('Failed to export image:', err);
+      }
+    }
+  };
+
+  const handleDownloadImage = () => {
+    if (previewImage) {
+      const link = document.createElement('a');
+      link.download = 'sentence-analysis.png';
+      link.href = previewImage;
+      link.click();
+      setPreviewImage(null);
+    }
+  };
+
+  const handleSaveAnalysis = async () => {
+    if (!user) {
+      if (window.confirm('You must be logged in to save analyses. Go to login page?')) {
+        navigate('/login');
+      }
+      return;
+    }
+
+    if (responseJSON && sentence) {
+      try {
+        await addDoc(collection(db, 'analyses'), {
+          uid: user.uid,
+          sentence: sentence,
+          result: responseJSON,
+          createdAt: serverTimestamp()
+        });
+        alert('Analysis saved successfully!');
+      } catch (err) {
+        console.error('Failed to save analysis', err);
+        alert('Failed to save analysis. See console for details.');
+      }
+    }
+  };
+
   return (
     <div className="dashboard">
       <div className="dashboard-header">
@@ -105,14 +179,34 @@ function Dashboard() {
           )}
           {responseJSON && !loading && (
             <div className="result-container">
-              <h3>Analysis Result:</h3>
-              <div className="tree-scroll-container">
+              <div className="result-header">
+                <h3>Analysis Result:</h3>
+                <div className="result-actions">
+                  <button onClick={handleSaveAnalysis} className="action-button" style={{backgroundColor: '#e67e22'}}>Save Analysis</button>
+                  <button onClick={handleCopyJSON} className="action-button">Copy JSON</button>
+                  <button onClick={handleExportImageClick} className="action-button">Export Image</button>
+                </div>
+              </div>
+              <div className="tree-scroll-container" ref={resultRef}>
                 <SentenceStructure data={responseJSON} />
               </div>
             </div>
           )}
         </div>
       </div>
+
+      {previewImage && (
+        <div className="modal-overlay">
+          <div className="modal-content image-preview-modal">
+            <h3>Image Preview</h3>
+            <img src={previewImage} alt="Analysis Preview" className="preview-image" />
+            <div className="modal-actions">
+              <button onClick={() => setPreviewImage(null)} className="cancel-button">Cancel</button>
+              <button onClick={handleDownloadImage} className="download-button">Download</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
