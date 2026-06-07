@@ -61,7 +61,7 @@ function Dashboard() {
     } catch (error) {
       console.error('Error:', error);
       setError(error.message || 'An error occurred. Please try again later.');
-    } finally setLoading(false);
+    } finally { setLoading(false); }
   };
 
   const handleSelectExample = (exSentence, exResult) => {

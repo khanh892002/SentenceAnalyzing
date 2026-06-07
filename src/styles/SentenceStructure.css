@@ -135,7 +135,7 @@
   transition: opacity 0.2s;
 }
 
-.part.phrase:hover > .collapse-toggle {
+.part.phrase:hover>.collapse-toggle {
   opacity: 1;
 }
 
@@ -167,7 +167,7 @@
 }
 
 .flat-leaf {
-  display: inline;
+  display: inline-block;
   padding: 3px 7px;
   border-radius: 10px;
   margin: 1px 2px;
