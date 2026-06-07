@@ -238,3 +238,91 @@
 .download-button:hover {
   background-color: #27ae60;
 }
+
+/* ===== Reading Assistant Layout ===== */
+.reading-assistant-layout {
+  display: flex;
+  gap: 15px;
+  height: 100%;
+}
+
+.reading-pane {
+  flex: 1;
+  padding: 12px;
+  line-height: 1.8;
+  font-size: 15px;
+  overflow-y: auto;
+  border-right: 1px solid var(--border-color, #eee);
+}
+
+.reading-sentence {
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.reading-sentence:hover {
+  background-color: rgba(52, 152, 219, 0.1);
+}
+
+.reading-sentence.active {
+  background-color: rgba(52, 152, 219, 0.2);
+  box-shadow: inset 0 -2px 0 0 #3498db;
+}
+
+.analysis-pane {
+  flex: 1.5;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.result-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.result-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.view-toggles {
+  display: flex;
+  gap: 16px;
+  padding: 6px 0;
+  border-top: 1px solid var(--border-color, #eee);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-label input[type="checkbox"] {
+  accent-color: #3498db;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Mobile: stack reading-assistant vertically */
+@media (max-width: 768px) {
+  .reading-assistant-layout {
+    flex-direction: column;
+  }
+
+  .reading-pane {
+    border-right: none;
+    border-bottom: 1px solid var(--border-color, #eee);
+    max-height: 200px;
+  }
+}

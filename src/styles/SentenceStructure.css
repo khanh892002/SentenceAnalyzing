@@ -148,3 +148,75 @@
 .part.phrase {
   cursor: pointer;
 }
+
+/* ===== Focus Mode ===== */
+.focus-blur {
+  opacity: 0.25;
+  filter: grayscale(60%);
+  transition: opacity 0.3s, filter 0.3s;
+}
+
+.focus-blur:hover {
+  opacity: 0.7;
+  filter: grayscale(0%);
+}
+
+/* ===== Flat Mode ===== */
+.sentence-structure.flat-mode {
+  line-height: 2.2;
+}
+
+.flat-leaf {
+  display: inline;
+  padding: 3px 7px;
+  border-radius: 10px;
+  margin: 1px 2px;
+  font-weight: 500;
+  font-size: 14px;
+  transition: opacity 0.3s, filter 0.3s;
+  /* Default fallback */
+  background-color: var(--color-punct-bg);
+  color: var(--color-punct-text);
+}
+
+/* POS color mapping for flat leaves */
+.flat-leaf.NOUN,
+.flat-leaf.PROPN,
+.flat-leaf.PRON {
+  background-color: var(--color-noun-bg);
+  color: var(--color-noun-text);
+}
+
+.flat-leaf.VERB,
+.flat-leaf.AUX {
+  background-color: var(--color-verb-bg);
+  color: var(--color-verb-text);
+}
+
+.flat-leaf.ADJ {
+  background-color: var(--color-adj-bg);
+  color: var(--color-adj-text);
+}
+
+.flat-leaf.ADV {
+  background-color: var(--color-adv-bg);
+  color: var(--color-adv-text);
+}
+
+.flat-leaf.ADP,
+.flat-leaf.DET,
+.flat-leaf.CCONJ,
+.flat-leaf.SCONJ,
+.flat-leaf.PART {
+  background-color: var(--color-func-bg);
+  color: var(--color-func-text);
+}
+
+.flat-leaf.PUNCT,
+.flat-leaf.SYM,
+.flat-leaf.NUM,
+.flat-leaf.INTJ,
+.flat-leaf.X {
+  background-color: var(--color-punct-bg);
+  color: var(--color-punct-text);
+}

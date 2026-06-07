@@ -35,9 +35,9 @@ app.post('/analyze-sentence', async (req, res) => {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error('FastAPI error:', errorData);
-      return res.status(response.status).json({ 
-        error: 'Failed to analyze sentence.', 
-        details: errorData 
+      return res.status(response.status).json({
+        error: errorData.detail || 'Failed to analyze sentence.',
+        details: errorData
       });
     }
 

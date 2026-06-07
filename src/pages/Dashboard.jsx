@@ -15,6 +15,9 @@ function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
+  const [selectedSentenceIndex, setSelectedSentenceIndex] = useState(0);
+  const [isFlatMode, setIsFlatMode] = useState(false);
+  const [isFocusMode, setIsFocusMode] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,6 +26,21 @@ function Dashboard() {
     });
     return () => unsubscribe();
   }, []);
+
+  const extractSentenceText = (node) => {
+    if (!node) return "";
+    let words = [];
+    const traverse = (n) => {
+      if (n.type === 'word' || (!n.content && n.text)) words.push(n.text);
+      if (n.content) n.content.forEach(traverse);
+    };
+    traverse(node);
+
+    let text = words.join(' ');
+    text = text.replace(/ ([.,?!;:'"”\])}])/g, '$1');
+    text = text.replace(/([\'"“\[({]) /g, '$1');
+    return text;
+  };
 
   const handleSubmit = async () => {
     let finalSentence = sentence.trim();
@@ -39,12 +57,11 @@ function Dashboard() {
       setError(null);
       const responseData = await analyzeSentence(finalSentence);
       setResponseJSON(responseData);
+      setSelectedSentenceIndex(0);
     } catch (error) {
       console.error('Error:', error);
       setError(error.message || 'An error occurred. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
+    } finally setLoading(false);
   };
 
   const handleSelectExample = (exSentence, exResult) => {
@@ -61,6 +78,7 @@ function Dashboard() {
       } else {
         setError(null);
         setResponseJSON(exResult);
+        setSelectedSentenceIndex(0);
       }
     }
   };
@@ -68,9 +86,7 @@ function Dashboard() {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      if (!loading && sentence.trim()) {
-        handleSubmit();
-      }
+      if (!loading && sentence.trim()) handleSubmit();
     }
   };
 
@@ -92,7 +108,7 @@ function Dashboard() {
         // Get current color scheme
         const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         const bgColor = isDark ? '#2c2c2c' : '#ffffff';
-        
+
         const dataUrl = await toPng(resultRef.current, { backgroundColor: bgColor });
         setPreviewImage(dataUrl);
       } catch (err) {
@@ -178,17 +194,42 @@ function Dashboard() {
             </div>
           )}
           {responseJSON && !loading && (
-            <div className="result-container">
-              <div className="result-header">
-                <h3>Analysis Result:</h3>
-                <div className="result-actions">
-                  <button onClick={handleSaveAnalysis} className="action-button" style={{backgroundColor: '#e67e22'}}>Save Analysis</button>
-                  <button onClick={handleCopyJSON} className="action-button">Copy JSON</button>
-                  <button onClick={handleExportImageClick} className="action-button">Export Image</button>
-                </div>
+            <div className="reading-assistant-layout">
+              <div className="reading-pane">
+                {responseJSON.map((tree, idx) => (
+                  <span
+                    key={idx}
+                    className={`reading-sentence ${idx === selectedSentenceIndex ? 'active' : ''}`}
+                    onClick={() => setSelectedSentenceIndex(idx)}
+                  >
+                    {extractSentenceText(tree)}{" "}
+                  </span>
+                ))}
               </div>
-              <div className="tree-scroll-container" ref={resultRef}>
-                <SentenceStructure data={responseJSON} />
+              <div className="analysis-pane result-container">
+                <div className="result-header">
+                  <div className="result-header-top">
+                    <h3>Analysis Result:</h3>
+                    <div className="result-actions">
+                      <button onClick={handleSaveAnalysis} className="action-button" style={{ backgroundColor: '#e67e22' }}>Save</button>
+                      <button onClick={handleCopyJSON} className="action-button">Copy JSON</button>
+                      <button onClick={handleExportImageClick} className="action-button">Export Image</button>
+                    </div>
+                  </div>
+                  <div className="view-toggles">
+                    <label className="toggle-label">
+                      <input type="checkbox" checked={isFlatMode} onChange={(e) => setIsFlatMode(e.target.checked)} />
+                      <span>Flat Mode</span>
+                    </label>
+                    <label className="toggle-label">
+                      <input type="checkbox" checked={isFocusMode} onChange={(e) => setIsFocusMode(e.target.checked)} />
+                      <span>Focus Mode</span>
+                    </label>
+                  </div>
+                </div>
+                <div className="tree-scroll-container" ref={resultRef}>
+                  <SentenceStructure data={[responseJSON[selectedSentenceIndex]]} isFlatMode={isFlatMode} isFocusMode={isFocusMode} />
+                </div>
               </div>
             </div>
           )}

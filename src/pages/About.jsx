@@ -4,7 +4,7 @@ function About() {
   return (
     <div className="about-container">
       <h1>About NLP Analyzer</h1>
-      
+
       <section className="about-section">
         <h2>Mục đích & Đối tượng sử dụng</h2>
         <p>Ứng dụng được thiết kế nhằm mục đích hỗ trợ học sinh, sinh viên, nhà nghiên cứu ngôn ngữ học, và lập trình viên trong việc phân tích cấu trúc ngữ pháp tiếng Anh. Công cụ giúp trực quan hóa mối quan hệ phụ thuộc giữa các từ trong câu (Dependency Parsing) một cách dễ hiểu thông qua cấu trúc cây.</p>

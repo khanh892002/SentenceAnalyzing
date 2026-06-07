@@ -1,7 +1,14 @@
 import { useMemo, useState } from 'react';
 import '../styles/SentenceStructure.css';
 
-function SentencePhrase({ node, renderNode }) {
+// Dependency roles considered "core" for Focus Mode (S-V-O backbone)
+const CORE_ROLES = new Set([
+  'ROOT', 'nsubj', 'nsubjpass', 'csubj', 'csubjpass',
+  'dobj', 'pobj', 'iobj', 'attr', 'ccomp', 'xcomp', 'acomp',
+  'agent', 'oprd'
+]);
+
+function SentencePhrase({ node, renderNode, isFocusMode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const toggleCollapse = (e) => {
@@ -9,11 +16,13 @@ function SentencePhrase({ node, renderNode }) {
     setIsCollapsed(!isCollapsed);
   };
 
+  const isBlurred = isFocusMode && !CORE_ROLES.has(node.role);
+
   return (
     <span
-      className={`part phrase ${node.pos} ${isCollapsed ? 'collapsed' : ''}`}
+      className={`part phrase ${node.pos} ${isCollapsed ? 'collapsed' : ''} ${isBlurred ? 'focus-blur' : ''}`}
       style={{ '--h': isCollapsed ? 0 : node.height }}
-      title={node.error || node.pos || 'Click to toggle collapse'}
+      title={`${node.role} (${node.pos})`}
       onClick={toggleCollapse}
     >
       <span className="collapse-toggle">
@@ -29,8 +38,8 @@ function SentencePhrase({ node, renderNode }) {
   );
 }
 
-function SentenceStructure({ data }) {
-  // Hàm đệ quy tính toán và gán thuộc tính height cho từng node
+function SentenceStructure({ data, isFlatMode = false, isFocusMode = false }) {
+  // Recursively calculate nesting height for each node
   const calculateHeights = (node) => {
     if (!node.content || node.content.length === 0) {
       node.height = 0;
@@ -41,19 +50,42 @@ function SentenceStructure({ data }) {
     return node.height;
   };
 
+  // Flatten a tree into an array of leaf nodes (words)
+  const flattenTree = (node) => {
+    if (!node) return [];
+    if (!node.content || node.content.length === 0) {
+      return [node];
+    }
+    return node.content.flatMap(child => flattenTree(child));
+  };
+
   const renderSentencePart = (node, index) => {
-    // Trường hợp 1: Cụm từ có content (Phrase)
+    // Phrase node
     if (node.content && node.content.length > 0) {
-      return <SentencePhrase key={index} node={node} renderNode={renderSentencePart} />;
+      return <SentencePhrase key={index} node={node} renderNode={renderSentencePart} isFocusMode={isFocusMode} />;
     }
 
-    // Trường hợp 2: Node lá
+    // Leaf node
+    const isBlurred = isFocusMode && !CORE_ROLES.has(node.role);
     return (
       <span
         key={index}
-        className={`part leaf ${node.pos}`}
+        className={`part leaf ${node.pos} ${isBlurred ? 'focus-blur' : ''}`}
         style={{ '--h': 0 }}
-        title={node.error || node.pos || ''}
+        title={`${node.role} (${node.pos})`}
+      >
+        {node.text}
+      </span>
+    );
+  };
+
+  const renderFlatLeaf = (node, index) => {
+    const isBlurred = isFocusMode && !CORE_ROLES.has(node.role);
+    return (
+      <span
+        key={index}
+        className={`flat-leaf ${node.pos} ${isBlurred ? 'focus-blur' : ''}`}
+        title={`${node.role} (${node.pos})`}
       >
         {node.text}
       </span>
@@ -67,6 +99,18 @@ function SentenceStructure({ data }) {
     return clonedData;
   }, [data]);
 
+  // Flat Mode: extract all leaves and render inline
+  if (isFlatMode) {
+    return (
+      <span className="sentence-structure flat-mode">
+        {processedData.flatMap((part, pIdx) =>
+          flattenTree(part).map((leaf, lIdx) => renderFlatLeaf(leaf, `${pIdx}-${lIdx}`))
+        )}
+      </span>
+    );
+  }
+
+  // Tree Mode (default)
   return (
     <span className="sentence-structure">
       {processedData.map((part, index) => renderSentencePart(part, index))}
