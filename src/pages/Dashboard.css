@@ -215,6 +215,70 @@
   border-radius: 8px;
 }
 
+/* Export Configuration Modal */
+.export-config-modal {
+  width: 90vw;
+  max-width: 1300px;
+  height: 90vh;
+}
+
+.modal-hint {
+  font-size: 14px;
+  color: #7f8c8d;
+  margin-bottom: 15px;
+}
+
+.slider-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 10px;
+  background: var(--phrase-bg, #f8f9fa);
+  border-radius: 8px;
+}
+
+.width-slider {
+  flex: 1;
+  cursor: pointer;
+}
+
+.export-preview-wrapper {
+  flex: 1;
+  overflow: auto;
+  border: 1px solid var(--border-color, #eee);
+  border-radius: 8px;
+  background: var(--panel-bg, #fff);
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.resizable-container {
+  resize: horizontal;
+  overflow: hidden;
+  border: 2px dashed #bdc3c7;
+  padding: 15px;
+  min-width: 300px;
+  max-width: 100%;
+  margin: 0 auto;
+  position: relative;
+}
+
+.resizable-container::after {
+  content: '⇦ Drag to resize ⇨';
+  position: absolute;
+  bottom: 0;
+  right: 15px;
+  font-size: 10px;
+  color: #95a5a6;
+  pointer-events: none;
+}
+
+.export-capture-area {
+  background: transparent;
+  padding: 10px;
+}
+
 .modal-actions {
   display: flex;
   justify-content: flex-end;

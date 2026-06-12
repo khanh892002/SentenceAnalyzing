@@ -90,8 +90,10 @@ function Dashboard() {
     }
   };
 
-  const [previewImage, setPreviewImage] = useState(null);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportWidth, setExportWidth] = useState(600);
   const resultRef = useRef(null);
+  const exportRef = useRef(null);
 
   const handleCopyJSON = () => {
     if (responseJSON) {
@@ -101,29 +103,28 @@ function Dashboard() {
     }
   };
 
-  const handleExportImageClick = async () => {
-    if (resultRef.current) {
+  const handleExportImageClick = () => {
+    // Open the export modal instead of capturing immediately
+    setShowExportModal(true);
+  };
+
+  const handleDownloadImage = async () => {
+    if (exportRef.current) {
       try {
         const { toPng } = await import('html-to-image');
         // Get current color scheme
         const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         const bgColor = isDark ? '#2c2c2c' : '#ffffff';
 
-        const dataUrl = await toPng(resultRef.current, { backgroundColor: bgColor });
-        setPreviewImage(dataUrl);
+        const dataUrl = await toPng(exportRef.current, { backgroundColor: bgColor });
+        const link = document.createElement('a');
+        link.download = 'sentence-analysis.png';
+        link.href = dataUrl;
+        link.click();
+        setShowExportModal(false);
       } catch (err) {
         console.error('Failed to export image:', err);
       }
-    }
-  };
-
-  const handleDownloadImage = () => {
-    if (previewImage) {
-      const link = document.createElement('a');
-      link.download = 'sentence-analysis.png';
-      link.href = previewImage;
-      link.click();
-      setPreviewImage(null);
     }
   };
 
@@ -236,14 +237,43 @@ function Dashboard() {
         </div>
       </div>
 
-      {previewImage && (
+      {showExportModal && responseJSON && (
         <div className="modal-overlay">
-          <div className="modal-content image-preview-modal">
-            <h3>Image Preview</h3>
-            <img src={previewImage} alt="Analysis Preview" className="preview-image" />
+          <div className="modal-content export-config-modal">
+            <h3>Configure Export Image</h3>
+            <p className="modal-hint">Drag the container corner or use the slider to adjust the width before downloading.</p>
+            
+            <div className="slider-container">
+              <label>Adjust Width: {exportWidth}px</label>
+              <input 
+                type="range" 
+                min="300" 
+                max="1200" 
+                value={exportWidth} 
+                onChange={(e) => setExportWidth(Number(e.target.value))} 
+                className="width-slider"
+              />
+            </div>
+            
+            <div className="export-preview-wrapper">
+              <div 
+                className="resizable-container" 
+                style={{ width: `${exportWidth}px` }}
+                onMouseUp={(e) => setExportWidth(e.target.offsetWidth)}
+              >
+                <div ref={exportRef} className="export-capture-area">
+                  <SentenceStructure 
+                    data={[responseJSON[selectedSentenceIndex]]} 
+                    isFlatMode={isFlatMode} 
+                    isFocusMode={isFocusMode} 
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="modal-actions">
-              <button onClick={() => setPreviewImage(null)} className="cancel-button">Cancel</button>
-              <button onClick={handleDownloadImage} className="download-button">Download</button>
+              <button onClick={() => setShowExportModal(false)} className="cancel-button">Cancel</button>
+              <button onClick={handleDownloadImage} className="download-button">Download Image</button>
             </div>
           </div>
         </div>
