@@ -1,24 +1,29 @@
-import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { analyzeSentence } from '../services/sentenceService';
-import SentenceStructure from '../components/SentenceStructure';
 import ExamplesList from '../components/ExamplesList';
 import PosLegend from '../components/PosLegend';
+import ReadingAssistant from '../components/ReadingAssistant';
 import { auth, db } from '../config/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import './Dashboard.css';
 
 function Dashboard() {
-  const [sentence, setSentence] = useState('');
+  const location = useLocation();
+  const [sentence, setSentence] = useState(location.state?.textToAnalyze || '');
   const [responseJSON, setResponseJSON] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
-  const [selectedSentenceIndex, setSelectedSentenceIndex] = useState(0);
-  const [isFlatMode, setIsFlatMode] = useState(false);
-  const [isFocusMode, setIsFocusMode] = useState(false);
   const navigate = useNavigate();
+
+  // Clear the state so it doesn't auto-fill again on refresh
+  useEffect(() => {
+    if (location.state?.textToAnalyze) {
+      navigate('/', { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -27,26 +32,10 @@ function Dashboard() {
     return () => unsubscribe();
   }, []);
 
-  const extractSentenceText = (node) => {
-    if (!node) return "";
-    let words = [];
-    const traverse = (n) => {
-      if (n.type === 'word' || (!n.content && n.text)) words.push(n.text);
-      if (n.content) n.content.forEach(traverse);
-    };
-    traverse(node);
-
-    let text = words.join(' ');
-    text = text.replace(/ ([.,?!;:'"”\])}])/g, '$1');
-    text = text.replace(/([\'"“\[({]) /g, '$1');
-    return text;
-  };
-
   const handleSubmit = async () => {
     let finalSentence = sentence.trim();
     if (!finalSentence) return;
 
-    // Kiểm tra và tự động thêm dấu chấm nếu thiếu ký hiệu kết thúc câu
     if (!/[.?!…]$/.test(finalSentence)) {
       finalSentence += '.';
       setSentence(finalSentence);
@@ -57,7 +46,6 @@ function Dashboard() {
       setError(null);
       const responseData = await analyzeSentence(finalSentence);
       setResponseJSON(responseData);
-      setSelectedSentenceIndex(0);
     } catch (error) {
       console.error('Error:', error);
       setError(error.message || 'An error occurred. Please try again later.');
@@ -78,7 +66,6 @@ function Dashboard() {
       } else {
         setError(null);
         setResponseJSON(exResult);
-        setSelectedSentenceIndex(0);
       }
     }
   };
@@ -87,44 +74,6 @@ function Dashboard() {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (!loading && sentence.trim()) handleSubmit();
-    }
-  };
-
-  const [showExportModal, setShowExportModal] = useState(false);
-  const [exportWidth, setExportWidth] = useState(600);
-  const resultRef = useRef(null);
-  const exportRef = useRef(null);
-
-  const handleCopyJSON = () => {
-    if (responseJSON) {
-      navigator.clipboard.writeText(JSON.stringify(responseJSON, null, 2))
-        .then(() => alert('JSON copied to clipboard!'))
-        .catch(err => console.error('Failed to copy JSON:', err));
-    }
-  };
-
-  const handleExportImageClick = () => {
-    // Open the export modal instead of capturing immediately
-    setShowExportModal(true);
-  };
-
-  const handleDownloadImage = async () => {
-    if (exportRef.current) {
-      try {
-        const { toPng } = await import('html-to-image');
-        // Get current color scheme
-        const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const bgColor = isDark ? '#2c2c2c' : '#ffffff';
-
-        const dataUrl = await toPng(exportRef.current, { backgroundColor: bgColor });
-        const link = document.createElement('a');
-        link.download = 'sentence-analysis.png';
-        link.href = dataUrl;
-        link.click();
-        setShowExportModal(false);
-      } catch (err) {
-        console.error('Failed to export image:', err);
-      }
     }
   };
 
@@ -142,7 +91,8 @@ function Dashboard() {
           uid: user.uid,
           sentence: sentence,
           result: responseJSON,
-          createdAt: serverTimestamp()
+          createdAt: serverTimestamp(),
+          isPublic: false
         });
         alert('Analysis saved successfully!');
       } catch (err) {
@@ -194,90 +144,15 @@ function Dashboard() {
               <div className="skeleton-line long" style={{ marginLeft: '20px' }}></div>
             </div>
           )}
-          {responseJSON && !loading && (
-            <div className="reading-assistant-layout">
-              <div className="reading-pane">
-                {responseJSON.map((tree, idx) => (
-                  <span
-                    key={idx}
-                    className={`reading-sentence ${idx === selectedSentenceIndex ? 'active' : ''}`}
-                    onClick={() => setSelectedSentenceIndex(idx)}
-                  >
-                    {extractSentenceText(tree)}{" "}
-                  </span>
-                ))}
-              </div>
-              <div className="analysis-pane result-container">
-                <div className="result-header">
-                  <div className="result-header-top">
-                    <h3>Analysis Result:</h3>
-                    <div className="result-actions">
-                      <button onClick={handleSaveAnalysis} className="action-button" style={{ backgroundColor: '#e67e22' }}>Save</button>
-                      <button onClick={handleCopyJSON} className="action-button">Copy JSON</button>
-                      <button onClick={handleExportImageClick} className="action-button">Export Image</button>
-                    </div>
-                  </div>
-                  <div className="view-toggles">
-                    <label className="toggle-label">
-                      <input type="checkbox" checked={isFlatMode} onChange={(e) => setIsFlatMode(e.target.checked)} />
-                      <span>Flat Mode</span>
-                    </label>
-                    <label className="toggle-label">
-                      <input type="checkbox" checked={isFocusMode} onChange={(e) => setIsFocusMode(e.target.checked)} />
-                      <span>Focus Mode</span>
-                    </label>
-                  </div>
-                </div>
-                <div className="tree-scroll-container" ref={resultRef}>
-                  <SentenceStructure data={[responseJSON[selectedSentenceIndex]]} isFlatMode={isFlatMode} isFocusMode={isFocusMode} />
-                </div>
-              </div>
-            </div>
+          {!loading && responseJSON && (
+            <ReadingAssistant 
+              responseJSON={responseJSON} 
+              onSave={handleSaveAnalysis} 
+              showSaveButton={true} 
+            />
           )}
         </div>
       </div>
-
-      {showExportModal && responseJSON && (
-        <div className="modal-overlay">
-          <div className="modal-content export-config-modal">
-            <h3>Configure Export Image</h3>
-            <p className="modal-hint">Drag the container corner or use the slider to adjust the width before downloading.</p>
-            
-            <div className="slider-container">
-              <label>Adjust Width: {exportWidth}px</label>
-              <input 
-                type="range" 
-                min="300" 
-                max="1200" 
-                value={exportWidth} 
-                onChange={(e) => setExportWidth(Number(e.target.value))} 
-                className="width-slider"
-              />
-            </div>
-            
-            <div className="export-preview-wrapper">
-              <div 
-                className="resizable-container" 
-                style={{ width: `${exportWidth}px` }}
-                onMouseUp={(e) => setExportWidth(e.target.offsetWidth)}
-              >
-                <div ref={exportRef} className="export-capture-area">
-                  <SentenceStructure 
-                    data={[responseJSON[selectedSentenceIndex]]} 
-                    isFlatMode={isFlatMode} 
-                    isFocusMode={isFocusMode} 
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="modal-actions">
-              <button onClick={() => setShowExportModal(false)} className="cancel-button">Cancel</button>
-              <button onClick={handleDownloadImage} className="download-button">Download Image</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

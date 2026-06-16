@@ -3,6 +3,8 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import About from './pages/About';
 import Login from './pages/Login';
+import SavedResults from './pages/SavedResults';
+import SharedResult from './pages/SharedResult';
 import './App.css';
 
 function App() {
@@ -13,6 +15,8 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="about" element={<About />} />
           <Route path="login" element={<Login />} />
+          <Route path="saved" element={<SavedResults />} />
+          <Route path="share/:id" element={<SharedResult />} />
         </Route>
       </Routes>
     </BrowserRouter>
