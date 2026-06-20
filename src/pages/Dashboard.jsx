@@ -92,7 +92,9 @@ function Dashboard() {
           sentence: sentence,
           result: responseJSON,
           createdAt: serverTimestamp(),
-          isPublic: false
+          isPublic: false,
+          version: "1.0",
+          lang: "en"
         });
         alert('Analysis saved successfully!');
       } catch (err) {

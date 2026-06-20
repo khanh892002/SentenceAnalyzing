@@ -1,8 +1,10 @@
 import sys
 import spacy
 import hashlib
-import sqlite3
-import json
+import os
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -10,24 +12,39 @@ from langdetect import detect, LangDetectException
 
 app = FastAPI()
 
+# SECURITY FIX: Restrict CORS
+# Update these domains with your actual production frontend URL
+ALLOWED_ORIGINS = [
+    "http://localhost:5173", # Vite dev
+    "http://localhost:3000", # Node proxy
+    "http://localhost:4173", # Vite preview
+    "https://syntax-analyzer-24163.firebaseapp.com",
+    "https://syntax-analyzer-24163.web.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
-# Initialize SQLite Cache
-conn = sqlite3.connect('sentence_cache.db', check_same_thread=False)
-cursor = conn.cursor()
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS sentence_cache (
-        hash TEXT PRIMARY KEY,
-        tree_json TEXT
-    )
-''')
-conn.commit()
+# Initialize Firebase Admin SDK for Global Cache
+# This requires serviceAccountKey.json in the project root
+SA_KEY_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'serviceAccountKey.json')
+db = None
+
+if os.path.exists(SA_KEY_PATH):
+    try:
+        cred = credentials.Certificate(SA_KEY_PATH)
+        firebase_admin.initialize_app(cred)
+        db = firestore.client()
+        print("Firebase Admin SDK initialized successfully.")
+    except Exception as e:
+        print(f"Error initializing Firebase Admin: {e}")
+else:
+    print(f"WARNING: serviceAccountKey.json not found at {SA_KEY_PATH}. Global Cache will be disabled.")
 
 try:
     # Load the English language model
@@ -40,9 +57,6 @@ class SentenceRequest(BaseModel):
     sentence: str
 
 def build_tree(token):
-    """
-    Recursively builds a tree from the spaCy token dependencies.
-    """
     node = {
         "role": token.dep_,
         "type": "word",
@@ -85,6 +99,10 @@ def analyze_sentence(request: SentenceRequest):
     if not text or not text.strip():
         raise HTTPException(status_code=400, detail="Sentence input is required.")
         
+    # SECURITY FIX: Limit payload size
+    if len(text) > 5000:
+        raise HTTPException(status_code=400, detail="Văn bản quá dài. Vui lòng nhập tối đa 5000 ký tự.")
+        
     try:
         lang = detect(text)
         if lang != 'en':
@@ -101,16 +119,20 @@ def analyze_sentence(request: SentenceRequest):
             continue
             
         sent_hash = get_sentence_hash(sent_text)
+        cached_tree = None
         
-        # Check SQLite cache
-        cursor.execute("SELECT tree_json FROM sentence_cache WHERE hash = ?", (sent_hash,))
-        cached_row = cursor.fetchone()
-        
-        if cached_row:
+        # 1. Check Global Cache in Firestore
+        if db:
+            doc_ref = db.collection('global_sentence_cache').document(sent_hash)
+            doc_snap = doc_ref.get()
+            if doc_snap.exists:
+                cached_tree = doc_snap.to_dict().get('tree')
+                
+        if cached_tree:
             # Cache Hit
-            results.append(json.loads(cached_row[0]))
+            results.append(cached_tree)
         else:
-            # Cache Miss
+            # Cache Miss -> Run spaCy
             roots = [token for token in sent if token.dep_ == "ROOT"]
             if not roots:
                 raise HTTPException(status_code=400, detail="Câu bị ngắt hoặc thiếu động từ chính (ROOT).")
@@ -118,10 +140,19 @@ def analyze_sentence(request: SentenceRequest):
             root = roots[0]
             tree = build_tree(root)
             
-            # Save to cache
-            cursor.execute("INSERT INTO sentence_cache (hash, tree_json) VALUES (?, ?)", (sent_hash, json.dumps(tree)))
-            conn.commit()
-            
+            # Save to Global Cache
+            if db:
+                try:
+                    db.collection('global_sentence_cache').document(sent_hash).set({
+                        'text': sent_text,
+                        'tree': tree,
+                        'version': '1.0',
+                        'lang': 'en',
+                        'createdAt': firestore.SERVER_TIMESTAMP
+                    })
+                except Exception as e:
+                    print(f"Failed to cache sentence in Firestore: {e}")
+                    
             results.append(tree)
         
     return results
