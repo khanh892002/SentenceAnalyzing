@@ -28,6 +28,35 @@ function Dashboard() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      
+      // Check for pending analysis to save after login
+      if (currentUser) {
+        const pending = sessionStorage.getItem('pendingAnalysis');
+        if (pending) {
+          try {
+            const { sentence: pendingSentence, result: pendingResult } = JSON.parse(pending);
+            addDoc(collection(db, 'analyses'), {
+              uid: currentUser.uid,
+              sentence: pendingSentence,
+              result: pendingResult,
+              createdAt: serverTimestamp(),
+              isPublic: false,
+              version: "1.0",
+              lang: "en"
+            }).then(() => {
+              sessionStorage.removeItem('pendingAnalysis');
+              setSentence(pendingSentence);
+              setResponseJSON(pendingResult);
+              alert('Bản phân tích của bạn đã được lưu lại thành công sau khi đăng nhập!');
+            }).catch(err => {
+              console.error('Failed to save pending analysis', err);
+            });
+          } catch (e) {
+            console.error('Error parsing pending analysis', e);
+            sessionStorage.removeItem('pendingAnalysis');
+          }
+        }
+      }
     });
     return () => unsubscribe();
   }, []);
@@ -80,6 +109,9 @@ function Dashboard() {
   const handleSaveAnalysis = async () => {
     if (!user) {
       if (window.confirm('You must be logged in to save analyses. Go to login page?')) {
+        if (responseJSON && sentence) {
+          sessionStorage.setItem('pendingAnalysis', JSON.stringify({ sentence, result: responseJSON }));
+        }
         navigate('/login');
       }
       return;

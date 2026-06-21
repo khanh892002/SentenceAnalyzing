@@ -11,7 +11,7 @@
   --color-func-bg: #7c3aed;
   --color-func-text: #ffffff;
   --color-punct-bg: #4b5563;
-  --color-punct-text: #ffffff;
+  --color-punct-text: #000;
 
   /* Container styles */
   --color-border: rgba(0, 0, 0, 0.15);

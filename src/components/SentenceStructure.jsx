@@ -80,20 +80,20 @@ function SentenceStructure({ data, isFlatMode = false, isFocusMode = false }) {
       if (n.content) n.content.forEach(traverse);
     };
     traverse(node);
-    
+
     let text = words.join(' ');
     text = text.replace(/ ([.,?!;:'"”\])}])/g, '$1');
     text = text.replace(/([\'"“\[({]) /g, '$1');
     return text;
   };
 
-  const renderSentencePart = (node, index) => {
-    const isBlurred = isFocusMode && !CORE_ROLES.has(node.role);
+  const renderSentencePart = (node, index, depth = 0) => {
+    const isBlurred = isFocusMode && node.type == "word" && !SEMANTIC_ROLES.has(node.role);
 
     // Phrase node
     if (node.content && node.content.length > 0) {
-      // Flat Mode: Compress phrase into a single block (height = 1)
-      if (isFlatMode) {
+      // Flat Mode: Compress direct children of ROOT (depth >= 1) into blocks
+      if (isFlatMode && depth >= 1) {
         return (
           <span
             key={index}
@@ -104,7 +104,17 @@ function SentenceStructure({ data, isFlatMode = false, isFocusMode = false }) {
           </span>
         );
       }
-      return <SentencePhrase key={index} node={node} renderNode={renderSentencePart} isFocusMode={isFocusMode} />;
+      
+      // Flat Mode: ROOT container (depth === 0) with height = 1
+      if (isFlatMode && depth === 0) {
+        return (
+          <span key={index} className="part phrase root-phrase" style={{ '--h': 1 }}>
+            {node.content.map((child, i) => renderSentencePart(child, i, depth + 1))}
+          </span>
+        );
+      }
+
+      return <SentencePhrase key={index} node={node} renderNode={(n, i) => renderSentencePart(n, i, depth + 1)} isFocusMode={isFocusMode} />;
     }
 
     // Leaf node
@@ -141,7 +151,7 @@ function SentenceStructure({ data, isFlatMode = false, isFocusMode = false }) {
 
   return (
     <span className={`sentence-structure ${isFlatMode ? 'flat-mode' : ''}`}>
-      {processedData.map((part, index) => renderSentencePart(part, index))}
+      {processedData.map((part, index) => renderSentencePart(part, index, 0))}
     </span>
   );
 }

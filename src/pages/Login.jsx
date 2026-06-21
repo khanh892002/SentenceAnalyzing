@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, googleProvider } from '../config/firebase';
-import { signInWithEmailAndPassword, signInWithPopup, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithPopup, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import './Login.css';
 
 function Login() {
@@ -10,6 +10,7 @@ function Login() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
   const validatePassword = (pwd) => {
@@ -24,6 +25,7 @@ function Login() {
   const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
+    setMessage('');
 
     if (isRegistering) {
       if (password !== confirmPassword) {
@@ -66,6 +68,27 @@ function Login() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Vui lòng nhập địa chỉ email của bạn vào ô Email phía trên trước khi nhấn Quên mật khẩu.');
+      setMessage('');
+      return;
+    }
+
+    try {
+      setError('');
+      await sendPasswordResetEmail(auth, email);
+      setMessage('Đã gửi email khôi phục mật khẩu. Vui lòng kiểm tra hộp thư của bạn.');
+    } catch (err) {
+      let errorMsg = 'Lỗi khi gửi email khôi phục.';
+      if (err.code === 'auth/invalid-email') errorMsg = 'Email không hợp lệ.';
+      if (err.code === 'auth/user-not-found') errorMsg = 'Không tìm thấy tài khoản với email này.';
+      setError(errorMsg);
+      setMessage('');
+      console.error(err);
+    }
+  };
+
   return (
     <div className="login-container">
       <div className="login-box">
@@ -77,43 +100,49 @@ function Login() {
             &times;
           </button>
         )}
-        
+
         <h2>{isRegistering ? "Register Account" : "Login to NLP Analyzer"}</h2>
         {error && <div className="login-error">{error}</div>}
-        
+        {message && <div className="login-success">{message}</div>}
+
         <form onSubmit={handleAuth} className="login-form">
           <div className="form-group">
             <label>Email</label>
-            <input 
-              type="email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              required 
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
           <div className="form-group">
             <label>Password</label>
-            <input 
-              type="password" 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              required 
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
             {isRegistering && (
               <small className="password-hint">
                 Min 14 chars, uppercase, lowercase, number, special char.
               </small>
             )}
+            {!isRegistering && (
+              <div className="forgot-password" onClick={handleForgotPassword}>
+                Forgot your password?
+              </div>
+            )}
           </div>
-          
+
           {isRegistering && (
             <div className="form-group">
               <label>Confirm Password</label>
-              <input 
-                type="password" 
-                value={confirmPassword} 
-                onChange={(e) => setConfirmPassword(e.target.value)} 
-                required 
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
               />
             </div>
           )}
@@ -128,6 +157,7 @@ function Login() {
             Don't have an account? <span className="register-link" onClick={() => {
               setIsRegistering(true);
               setError('');
+              setMessage('');
             }}>Sign up here</span>
           </div>
         )}
