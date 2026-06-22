@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { db } from '../config/firebase';
-import { doc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import './FeedbackWidget.css';
 
 function FeedbackWidget() {
@@ -31,7 +31,7 @@ function FeedbackWidget() {
     setIsSubmitting(true);
 
     try {
-      const feedbackRef = collection(db, 'feedbacks'); 
+      const feedbackRef = collection(db, 'feedbacks');
       await addDoc(feedbackRef, {
         email,
         feedback,
@@ -40,13 +40,13 @@ function FeedbackWidget() {
       setFeedback('');
       setEmail('');
       setIsSuccess(true);
-      
+
       // Auto-close after 2 seconds
       setTimeout(() => {
         setIsOpen(false);
         setIsSuccess(false);
       }, 2000);
-      
+
     } catch (err) {
       setErrorMsg('Failed to submit feedback. Please try again.');
       console.error(err);
@@ -72,39 +72,39 @@ function FeedbackWidget() {
               </div>
             </div>
           ) : (
-          <form onSubmit={handleSubmit} className="feedback-form">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Your email address"
-              required
-              className="feedback-email-input"
-            />
-            <div className="feedback-textarea-container">
-              <textarea
-                value={feedback}
-                onChange={(e) => {
-                  setFeedback(e.target.value);
-                  if (e.target.value.length <= charCountLimit) {
-                    setErrorMsg('');
-                  }
-                }}
-                placeholder="Tell us what you think..."
+            <form onSubmit={handleSubmit} className="feedback-form">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Your email address"
                 required
-                className="feedback-textarea"
+                className="feedback-email-input"
               />
-              <div className="feedback-text-counter">
-                {feedback.length} / {charCountLimit}
+              <div className="feedback-textarea-container">
+                <textarea
+                  value={feedback}
+                  onChange={(e) => {
+                    setFeedback(e.target.value);
+                    if (e.target.value.length <= charCountLimit) {
+                      setErrorMsg('');
+                    }
+                  }}
+                  placeholder="Tell us what you think..."
+                  required
+                  className="feedback-textarea"
+                />
+                <div className="feedback-text-counter">
+                  {feedback.length} / {charCountLimit}
+                </div>
               </div>
-            </div>
 
-            {errorMsg && <div className="feedback-error-message">{errorMsg}</div>}
+              {errorMsg && <div className="feedback-error-message">{errorMsg}</div>}
 
-            <button type="submit" className="submit-feedback-btn" disabled={isSubmitting}>
-              {isSubmitting ? 'Submitting...' : 'Submit'}
-            </button>
-          </form>
+              <button type="submit" className="submit-feedback-btn" disabled={isSubmitting}>
+                {isSubmitting ? 'Submitting...' : 'Submit'}
+              </button>
+            </form>
           )}
         </div>
       ) : (

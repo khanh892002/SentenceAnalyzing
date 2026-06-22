@@ -12,5 +12,12 @@ service cloud.firestore {
       // Allow update and delete only for the owner
       allow update, delete: if request.auth != null && resource.data.uid == request.auth.uid;
     }
+
+    match /feedbacks/{feedbackId} {
+      // Anyone (including unauthenticated users) can submit feedback
+      allow create: if true;
+      // Only admins read feedbacks — block all client reads
+      allow read, update, delete: if false;
+    }
   }
 }
