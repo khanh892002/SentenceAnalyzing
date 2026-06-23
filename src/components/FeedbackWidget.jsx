@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { db } from '../config/firebase';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import './FeedbackWidget.css';

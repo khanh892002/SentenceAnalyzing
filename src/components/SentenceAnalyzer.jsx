@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { analyzeSentence } from '../services/sentenceService';
 import SentenceStructure from './SentenceStructure';
+import './SentenceAnalyzer.css';
 
 function SentenceAnalyzer() {
   const [sentence, setSentence] = useState('');

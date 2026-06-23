@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import '../styles/SentenceStructure.css';
+import './SentenceStructure.css';
 
 // Dependency roles considered "core" for Focus Mode (S-V-O backbone)
 const CORE_ROLES = new Set([
@@ -104,7 +104,7 @@ function SentenceStructure({ data, isFlatMode = false, isFocusMode = false }) {
           </span>
         );
       }
-      
+
       // Flat Mode: ROOT container (depth === 0) with height = 1
       if (isFlatMode && depth === 0) {
         return (
