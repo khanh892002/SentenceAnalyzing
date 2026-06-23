@@ -12,9 +12,9 @@
 }
 
 .back-button {
-  background: var(--btn-bg, #f0f0f0);
-  color: var(--text-color, #333);
-  border: none;
+  background: var(--btn-bg, black);
+  color: var(--text-color, grey);
+  border: 1px solid grey;
   padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
@@ -23,6 +23,7 @@
 
 .back-button:hover {
   background: #e0e0e0;
+  color: #333;
 }
 
 .empty-state {
@@ -32,7 +33,7 @@
   min-height: 400px;
   background: var(--panel-bg, #ffffff);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .empty-content {
@@ -71,7 +72,7 @@
   background: var(--panel-bg, #ffffff);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
   border: 1px solid var(--border-color, #eee);
@@ -81,7 +82,7 @@
 
 .result-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
@@ -196,6 +197,13 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

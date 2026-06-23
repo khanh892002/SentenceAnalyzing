@@ -33,6 +33,7 @@ function Navbar() {
         <Link to="/">Dashboard</Link>
         <Link to="/saved">My Analyses</Link>
         <Link to="/about">About</Link>
+        <Link to="/settings">Settings</Link>
         {user ? (
           <button onClick={handleLogout} className="logout-btn">Logout</button>
         ) : (
