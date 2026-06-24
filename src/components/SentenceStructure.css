@@ -11,7 +11,8 @@
   --color-func-bg: #7c3aed;
   --color-func-text: #ffffff;
   --color-punct-bg: #4b5563;
-  --color-punct-text: #000;
+  --color-punct-text: #fff;
+  --color-collapse-toggle: #000;
 
   /* Container styles */
   --color-border: rgba(0, 0, 0, 0.15);
@@ -34,6 +35,7 @@
     --color-func-text: #ffffff;
     --color-punct-bg: #6b7280;
     --color-punct-text: #ffffff;
+    --color-collapse-toggle: #fff;
 
     /* Container styles */
     --color-border: rgba(255, 255, 255, 0.2);
@@ -128,7 +130,7 @@
 .collapse-toggle {
   cursor: pointer;
   font-size: 11px;
-  color: var(--color-punct-text, #7f8c8d);
+  color: var(--color-collapse-toggle, #9aad45);
   user-select: none;
   margin-right: 4px;
   opacity: 0.6;

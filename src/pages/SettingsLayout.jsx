@@ -11,7 +11,7 @@ function Settings() {
             <div className="features-navbar">
                 {featuresPaths.map((feature) => (
                     <NavLink key={feature.path} to={feature.path}
-                        style={({ isActive }) => ({ fontWeight: isActive ? "bold" : "normal" })}>
+                        style={({ isActive }) => ({ fontWeight: isActive ? "bold" : "normal", backgroundColor: isActive ? "#00000030" : "transparent" })}>
                         {feature.name}</NavLink>
                 ))}
             </div>
