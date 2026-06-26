@@ -4,3 +4,4 @@ spacy>=3.7.4
 pydantic>=2.7.4
 langdetect>=1.0.9
 firebase-admin>=6.5.0
+text-validator>=0.3.0
