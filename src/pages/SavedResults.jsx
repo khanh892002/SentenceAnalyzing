@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../config/firebase';
-import { collection, query, where, orderBy, limit, startAfter, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit, startAfter, getDocs, onSnapshot, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import ReadingAssistant from '../components/ReadingAssistant';
+import SigninRequest from '../components/SigninRequest';
 import './SavedResults.css';
 
 function SavedResults() {
@@ -16,53 +17,69 @@ function SavedResults() {
   const [selectedResult, setSelectedResult] = useState(null);
   const navigate = useNavigate();
 
+  const PAGE_SIZE = 10;
+  const unsubscribeSnapshotRef = useRef(null);
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoadingUser(false);
+
+      // Tear down any previous listener before creating a new one
+      if (unsubscribeSnapshotRef.current) {
+        unsubscribeSnapshotRef.current();
+        unsubscribeSnapshotRef.current = null;
+      }
+
       if (currentUser) {
-        fetchAnalyses(currentUser, true);
+        // Real-time listener for the first page of analyses
+        const q = query(
+          collection(db, 'analyses'),
+          where('uid', '==', currentUser.uid),
+          orderBy('createdAt', 'desc'),
+          limit(PAGE_SIZE)
+        );
+
+        const unsub = onSnapshot(q, (snapshot) => {
+          const liveAnalyses = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+          setAnalyses(liveAnalyses);
+          setLastVisible(snapshot.docs[snapshot.docs.length - 1] ?? null);
+          setHasMore(snapshot.docs.length === PAGE_SIZE);
+        }, (error) => {
+          console.error('Realtime listener error:', error);
+        });
+
+        unsubscribeSnapshotRef.current = unsub;
+      } else {
+        setAnalyses([]);
       }
     });
-    return () => unsubscribe();
+
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeSnapshotRef.current) unsubscribeSnapshotRef.current();
+    };
   }, []);
 
-  const fetchAnalyses = async (currentUser, isInitial = false) => {
-    if (!currentUser || loading || !hasMore) return;
-
+  // Load More: fetches the next page with getDocs and appends (no realtime for subsequent pages)
+  const loadMoreAnalyses = async () => {
+    if (!user || loading || !hasMore || !lastVisible) return;
     setLoading(true);
     try {
-      const analysesRef = collection(db, 'analyses');
-      let q = query(
-        analysesRef,
-        where('uid', '==', currentUser.uid),
+      const q = query(
+        collection(db, 'analyses'),
+        where('uid', '==', user.uid),
         orderBy('createdAt', 'desc'),
-        limit(10)
+        limit(PAGE_SIZE),
+        startAfter(lastVisible)
       );
-
-      if (!isInitial && lastVisible) {
-        q = query(q, startAfter(lastVisible));
-      }
-
-      const documentSnapshots = await getDocs(q);
-
-      const newAnalyses = [];
-      documentSnapshots.forEach((doc) => {
-        newAnalyses.push({ id: doc.id, ...doc.data() });
-      });
-
-      if (isInitial) {
-        setAnalyses(newAnalyses);
-      } else {
-        setAnalyses(prev => [...prev, ...newAnalyses]);
-      }
-
-      setLastVisible(documentSnapshots.docs[documentSnapshots.docs.length - 1]);
-      if (documentSnapshots.docs.length < 10) {
-        setHasMore(false);
-      }
+      const snapshot = await getDocs(q);
+      const more = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      setAnalyses(prev => [...prev, ...more]);
+      setLastVisible(snapshot.docs[snapshot.docs.length - 1] ?? null);
+      if (snapshot.docs.length < PAGE_SIZE) setHasMore(false);
     } catch (error) {
-      console.error("Error fetching analyses: ", error);
+      console.error('Error loading more analyses:', error);
     } finally {
       setLoading(false);
     }
@@ -108,20 +125,9 @@ function SavedResults() {
 
   if (loadingUser) return <div className="saved-container">Loading...</div>;
 
-  if (!user) {
-    return (
-      <div className="saved-container empty-state">
-        <div className="empty-content">
-          <span className="empty-icon">🔒</span>
-          <h2>Authentication Required</h2>
-          <p>Please log in to view and manage your saved analyses.</p>
-          <button onClick={() => navigate('/login')} className="login-button">Go to Login</button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
+  return (!user) ? (
+    <SigninRequest />
+  ) : (
     <div className="saved-container">
       <div className="saved-header">
         <h2>My Saved Analyses</h2>
@@ -185,7 +191,7 @@ function SavedResults() {
 
           {hasMore && analyses.length > 0 && (
             <div className="load-more-container">
-              <button onClick={() => fetchAnalyses(user)} disabled={loading} className="load-more-btn">
+              <button onClick={loadMoreAnalyses} disabled={loading} className="load-more-btn">
                 {loading ? 'Loading...' : 'Load More'}
               </button>
             </div>

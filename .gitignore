@@ -49,3 +49,6 @@ dist-ssr
 
 .env
 serviceAccountKey.json
+
+# Developer knowledge base (local only)
+dev-notes.md

@@ -5,12 +5,19 @@ import os
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langdetect import detect, LangDetectException
 
-app = FastAPI()
+app = FastAPI(
+    title="Sentence Analyzer API",
+    version="1.0.0",
+    description="NLP sentence structure analysis powered by spaCy."
+)
+
+# Versioned router — all new endpoints go here
+api_v1 = APIRouter(prefix="/api/v1")
 
 # SECURITY FIX: Restrict CORS
 # Update these domains with your actual production frontend URL
@@ -93,7 +100,7 @@ def build_tree(token):
 def get_sentence_hash(text: str) -> str:
     return hashlib.sha256(text.encode('utf-8')).hexdigest()
 
-@app.post("/analyze")
+@api_v1.post("/analyze", summary="Analyze sentence structure")
 def analyze_sentence(request: SentenceRequest):
     text = request.sentence
     if not text or not text.strip():
@@ -156,6 +163,15 @@ def analyze_sentence(request: SentenceRequest):
             results.append(tree)
         
     return results
+
+# Mount the versioned router
+app.include_router(api_v1)
+
+# Legacy alias — redirects old clients to v1 without breaking them
+@app.post("/analyze", include_in_schema=False)
+def analyze_sentence_legacy(request: SentenceRequest):
+    """Deprecated: use /api/v1/analyze instead."""
+    return analyze_sentence(request)
 
 if __name__ == "__main__":
     import uvicorn

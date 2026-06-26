@@ -1,12 +1,26 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import './SettingsLayout.css';
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../config/firebase';
+import SigninRequest from '../components/SigninRequest';
 
 const featuresPaths = [
     { path: 'reset-password', name: 'Reset Password' },
 ];
 
 function Settings() {
-    return (
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+        });
+        return () => unsubscribe();
+    }, []);
+
+    return (!user) ? (
+        <SigninRequest />
+    ) : (
         <div className="settings-container">
             <div className="features-navbar">
                 {featuresPaths.map((feature) => (
