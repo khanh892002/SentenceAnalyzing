@@ -30,9 +30,26 @@
   width: 100%;
   padding: 8px;
   border: 1px solid #504c4c;
-  border-radius: 8px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
   font-size: 16px;
   resize: none;
+  box-sizing: border-box;
+}
+
+.cursor-index-indicator {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #7f8c8d;
+  padding: 6px 12px;
+  background-color: #1e1e1e;
+  border: 1px solid #504c4c;
+  border-top: none;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
   box-sizing: border-box;
 }
 
@@ -390,3 +407,79 @@
     max-height: 200px;
   }
 }
+
+/* ===== Segmented Control ===== */
+.segmented-control {
+  display: flex;
+  background: var(--phrase-bg, #f1f2f6);
+  border-radius: 8px;
+  padding: 2px;
+  border: 1px solid var(--border-color, #eee);
+}
+
+.segmented-btn {
+  border: none;
+  background: transparent;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-color, #2c3e50);
+}
+
+.segmented-btn.active {
+  background: var(--panel-bg, #ffffff);
+  color: #3498db;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== Document View Mode ===== */
+.document-view-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px 5px;
+}
+
+.document-sentence-card {
+  background: var(--panel-bg, #ffffff);
+  border: 1px solid var(--border-color, #eee);
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.document-sentence-card.highlighted {
+  border-color: #3498db;
+  box-shadow: 0 0 0 1px #3498db, 0 3px 10px rgba(52, 152, 219, 0.1);
+}
+
+.document-sentence-header {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--border-color, #eee);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.document-sentence-header h4 {
+  margin: 0;
+  color: #3498db;
+  font-size: 14px;
+}
+
+.card-text-preview {
+  font-size: 13px;
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+.document-sentence-body {
+  overflow-x: auto;
+  padding-bottom: 5px;
+}

@@ -222,3 +222,22 @@
   background-color: var(--color-punct-bg);
   color: var(--color-punct-text);
 }
+
+/* ===== Bracket Groups / Quotations ===== */
+.part.bracket-group {
+  background-color: rgba(52, 152, 219, 0.05); /* very light blue background */
+  border: 1.5px dashed rgba(52, 152, 219, 0.35); /* dashed blue border */
+  border-radius: 8px;
+  padding: 4px 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.bracket-symbol {
+  font-weight: 700;
+  font-size: 1.15em;
+  color: #3498db;
+  padding: 0 3px;
+  user-select: none;
+}

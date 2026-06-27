@@ -20,6 +20,9 @@ function SharedResult() {
         if (docSnap.exists()) {
           const docData = docSnap.data();
           if (docData.isPublic) {
+            if (typeof docData.result === 'string') {
+              docData.result = JSON.parse(docData.result);
+            }
             setData(docData);
           } else {
             setError('This analysis is not public.');

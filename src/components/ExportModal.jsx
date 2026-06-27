@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import SentenceStructure from './SentenceStructure';
 
-function ExportModal({ tree, isFlatMode, isFocusMode, onClose }) {
+function ExportModal({ data, isFlatMode, isFocusMode, onClose }) {
   const [exportWidth, setExportWidth] = useState(600);
   const exportRef = useRef(null);
 
@@ -15,7 +15,7 @@ function ExportModal({ tree, isFlatMode, isFocusMode, onClose }) {
 
         const dataUrl = await toPng(exportRef.current, { backgroundColor: bgColor });
         const link = document.createElement('a');
-        link.download = 'sentence-analysis.png';
+        link.download = data.length > 1 ? 'document-analysis.png' : 'sentence-analysis.png';
         link.href = dataUrl;
         link.click();
         onClose();
@@ -49,12 +49,21 @@ function ExportModal({ tree, isFlatMode, isFocusMode, onClose }) {
             style={{ width: `${exportWidth}px` }}
             onMouseUp={(e) => setExportWidth(e.target.offsetWidth)}
           >
-            <div ref={exportRef} className="export-capture-area">
-              <SentenceStructure 
-                data={[tree]} 
-                isFlatMode={isFlatMode} 
-                isFocusMode={isFocusMode} 
-              />
+            <div ref={exportRef} className="export-capture-area vertical-export-list">
+              {data.map((tree, idx) => (
+                <div key={idx} className="export-sentence-block" style={{ marginBottom: idx < data.length - 1 ? '30px' : '0' }}>
+                  {data.length > 1 && (
+                    <div className="export-sentence-label" style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '14px', color: '#95a5a6' }}>
+                      Sentence {idx + 1}
+                    </div>
+                  )}
+                  <SentenceStructure 
+                    data={[tree]} 
+                    isFlatMode={isFlatMode} 
+                    isFocusMode={isFocusMode} 
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>

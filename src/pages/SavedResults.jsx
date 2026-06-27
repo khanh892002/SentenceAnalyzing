@@ -41,7 +41,14 @@ function SavedResults() {
         );
 
         const unsub = onSnapshot(q, (snapshot) => {
-          const liveAnalyses = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+          const liveAnalyses = snapshot.docs.map(d => {
+            const docData = d.data();
+            return {
+              id: d.id,
+              ...docData,
+              result: typeof docData.result === 'string' ? JSON.parse(docData.result) : docData.result
+            };
+          });
           setAnalyses(liveAnalyses);
           setLastVisible(snapshot.docs[snapshot.docs.length - 1] ?? null);
           setHasMore(snapshot.docs.length === PAGE_SIZE);
@@ -74,7 +81,14 @@ function SavedResults() {
         startAfter(lastVisible)
       );
       const snapshot = await getDocs(q);
-      const more = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      const more = snapshot.docs.map(d => {
+        const docData = d.data();
+        return {
+          id: d.id,
+          ...docData,
+          result: typeof docData.result === 'string' ? JSON.parse(docData.result) : docData.result
+        };
+      });
       setAnalyses(prev => [...prev, ...more]);
       setLastVisible(snapshot.docs[snapshot.docs.length - 1] ?? null);
       if (snapshot.docs.length < PAGE_SIZE) setHasMore(false);

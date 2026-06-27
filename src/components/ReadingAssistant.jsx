@@ -7,6 +7,7 @@ function ReadingAssistant({ responseJSON, onSave, onReAnalyze, showSaveButton = 
   const [isFlatMode, setIsFlatMode] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [viewMode, setViewMode] = useState('sentence'); // 'sentence' or 'document'
   const resultRef = useRef(null);
 
   const extractSentenceText = (node) => {
@@ -21,6 +22,16 @@ function ReadingAssistant({ responseJSON, onSave, onReAnalyze, showSaveButton = 
     text = text.replace(/ ([.,?!;:'"”\])}])/g, '$1');
     text = text.replace(/([\'"“\[({]) /g, '$1');
     return text;
+  };
+
+  const handleSentenceClick = (idx) => {
+    setSelectedSentenceIndex(idx);
+    if (viewMode === 'document') {
+      const element = document.getElementById(`doc-sentence-${idx}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
   };
 
   const handleCopyJSON = () => {
@@ -41,7 +52,7 @@ function ReadingAssistant({ responseJSON, onSave, onReAnalyze, showSaveButton = 
             <span
               key={idx}
               className={`reading-sentence ${idx === selectedSentenceIndex ? 'active' : ''}`}
-              onClick={() => setSelectedSentenceIndex(idx)}
+              onClick={() => handleSentenceClick(idx)}
             >
               {extractSentenceText(tree)}{" "}
             </span>
@@ -59,6 +70,22 @@ function ReadingAssistant({ responseJSON, onSave, onReAnalyze, showSaveButton = 
               </div>
             </div>
             <div className="view-toggles">
+              <div className="segmented-control">
+                <button 
+                  type="button" 
+                  className={`segmented-btn ${viewMode === 'sentence' ? 'active' : ''}`}
+                  onClick={() => setViewMode('sentence')}
+                >
+                  Sentence
+                </button>
+                <button 
+                  type="button" 
+                  className={`segmented-btn ${viewMode === 'document' ? 'active' : ''}`}
+                  onClick={() => setViewMode('document')}
+                >
+                  Document
+                </button>
+              </div>
               <label className="toggle-label">
                 <input type="checkbox" checked={isFlatMode} onChange={(e) => setIsFlatMode(e.target.checked)} />
                 <span>Flat Mode</span>
@@ -70,14 +97,35 @@ function ReadingAssistant({ responseJSON, onSave, onReAnalyze, showSaveButton = 
             </div>
           </div>
           <div className="tree-scroll-container" ref={resultRef}>
-            <SentenceStructure data={[responseJSON[selectedSentenceIndex]]} isFlatMode={isFlatMode} isFocusMode={isFocusMode} />
+            {viewMode === 'sentence' ? (
+              <SentenceStructure data={[responseJSON[selectedSentenceIndex]]} isFlatMode={isFlatMode} isFocusMode={isFocusMode} />
+            ) : (
+              <div className="document-view-container">
+                {responseJSON.map((tree, idx) => (
+                  <div 
+                    key={idx} 
+                    id={`doc-sentence-${idx}`}
+                    className={`document-sentence-card ${idx === selectedSentenceIndex ? 'highlighted' : ''}`}
+                    onClick={() => setSelectedSentenceIndex(idx)}
+                  >
+                    <div className="document-sentence-header">
+                      <h4>Sentence {idx + 1}</h4>
+                      <span className="card-text-preview">{extractSentenceText(tree)}</span>
+                    </div>
+                    <div className="document-sentence-body">
+                      <SentenceStructure data={[tree]} isFlatMode={isFlatMode} isFocusMode={isFocusMode} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {showExportModal && (
         <ExportModal 
-           tree={responseJSON[selectedSentenceIndex]} 
+           data={viewMode === 'sentence' ? [responseJSON[selectedSentenceIndex]] : responseJSON} 
            isFlatMode={isFlatMode} 
            isFocusMode={isFocusMode} 
            onClose={() => setShowExportModal(false)} 

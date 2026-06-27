@@ -16,7 +16,12 @@ function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
+  const [cursorIndex, setCursorIndex] = useState(0);
   const navigate = useNavigate();
+
+  const handleCursorMove = (e) => {
+    setCursorIndex(e.target.selectionStart || 0);
+  };
 
   // Clear the state so it doesn't auto-fill again on refresh
   useEffect(() => {
@@ -28,7 +33,7 @@ function Dashboard() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      
+
       // Check for pending analysis to save after login
       if (currentUser) {
         const pending = sessionStorage.getItem('pendingAnalysis');
@@ -38,7 +43,7 @@ function Dashboard() {
             addDoc(collection(db, 'analyses'), {
               uid: currentUser.uid,
               sentence: pendingSentence,
-              result: pendingResult,
+              result: JSON.stringify(pendingResult, null, 0),
               createdAt: serverTimestamp(),
               isPublic: false,
               version: "1.0",
@@ -68,6 +73,75 @@ function Dashboard() {
     if (!/[.?!…]$/.test(finalSentence)) {
       finalSentence += '.';
       setSentence(finalSentence);
+    }
+
+    if ((finalSentence.match(/"/g) || []).length & 1) {
+      setError("The number of double quotes is odd.");
+      return;
+    }
+
+    // Biểu thức kiểm tra dấu ngoặc kép kẹp giữa 2 ký tự (chữ hoặc số)
+    // \p{L} bao gồm tất cả các chữ cái trong Unicode (có tiếng Việt)
+    // \p{N} bao gồm các chữ số
+    const suspiciousQuoteRegex = /([\p{L}\p{N}])"([\p{L}\p{N}])/u;
+
+    // dấu ngoặc bị cô lập (đứng giữa 2 khoảng trắng)
+    const isolatedQuoteRegex = /\s["']\s/;
+
+    if (suspiciousQuoteRegex.test(finalSentence)) {
+      setError("There is a double quote surrounded with characters.");
+      return;
+    }
+    if (isolatedQuoteRegex.test(finalSentence)) {
+      setError("There is a double quote isolated with spaces.");
+      return;
+    }
+
+    // Regex: Bắt đầu chuỗi, hoặc các khoảng trắng, ngoặc mở, dấu gạch ngang, dấu chấm
+    finalSentence = finalSentence.replace(/(^|[\s\(\[{\[\-_\.])"/g, '$1“');
+    finalSentence = finalSentence.replace(/"/g, '”');
+
+    function validateBracketsAndQuotes(text) {
+      const stack = [];
+
+      // Từ điển ánh xạ dấu đóng với dấu mở tương ứng
+      const bracketMap = { ')': '(', ']': '[', '}': '{', '”': '“' };
+
+      const openBrackets = Object.values(bracketMap);
+      const closeBrackets = Object.keys(bracketMap);
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+
+        if (openBrackets.includes(char)) {
+          stack.push({ char, index: i });
+        }
+        else if (closeBrackets.includes(char)) {
+          if (stack.length === 0) {
+            return { isValid: false, error: `Spare a closing mark '${char}' at index ${i}.` };
+          }
+
+          const lastOpen = stack.pop();
+          if (bracketMap[char] !== lastOpen.char) {
+            return { isValid: false, error: `Mismatch in nested structure: opened '${lastOpen.char}' but closed with '${char}' at index ${i}.` };
+          }
+        }
+      }
+
+      if (stack.length > 0) {
+        const unclosed = stack.pop();
+        return {
+          isValid: false, error: `Miss a closing mark '${unclosed.char}' at index ${unclosed.index}.`
+        };
+      }
+
+      return { isValid: true, error: null };
+    }
+
+    const validation = validateBracketsAndQuotes(finalSentence);
+    if (!validation.isValid) {
+      setError(validation.error);
+      return;
     }
 
     try {
@@ -122,7 +196,7 @@ function Dashboard() {
         await addDoc(collection(db, 'analyses'), {
           uid: user.uid,
           sentence: sentence,
-          result: responseJSON,
+          result: JSON.stringify(responseJSON, null, 0),
           createdAt: serverTimestamp(),
           isPublic: false,
           version: "1.0",
@@ -149,11 +223,21 @@ function Dashboard() {
         <div className="left-panel">
           <textarea
             value={sentence}
-            onChange={(e) => setSentence(e.target.value)}
+            onChange={(e) => {
+              setSentence(e.target.value);
+              handleCursorMove(e);
+            }}
+            onClick={handleCursorMove}
+            onKeyUp={handleCursorMove}
+            onFocus={handleCursorMove}
             onKeyDown={handleKeyDown}
             placeholder="Enter a sentence or paragraph here to analyze..."
             className="sentence-textarea"
           />
+          <div className="cursor-index-indicator">
+            <span>Cursor: {cursorIndex}</span>
+            <span>Total: {sentence.length}</span>
+          </div>
         </div>
 
         <div className="center-panel">
@@ -179,10 +263,10 @@ function Dashboard() {
             </div>
           )}
           {!loading && responseJSON && (
-            <ReadingAssistant 
-              responseJSON={responseJSON} 
-              onSave={handleSaveAnalysis} 
-              showSaveButton={true} 
+            <ReadingAssistant
+              responseJSON={responseJSON}
+              onSave={handleSaveAnalysis}
+              showSaveButton={true}
             />
           )}
         </div>

@@ -105,6 +105,28 @@ function SentenceStructure({ data, isFlatMode = false, isFocusMode = false }) {
         );
       }
 
+      // Handle Bracketed Clauses / Quotations
+      if (node.type === 'bracket_group') {
+        return (
+          <span 
+            key={index} 
+            className={`part bracket-group ${isBlurred ? 'focus-blur' : ''}`}
+            title={`${node.role} (Group)`}
+          >
+            {node.content.map((child, i) => {
+              if (child.role === 'punct') {
+                return (
+                  <span key={i} className="bracket-symbol">
+                    {child.text}
+                  </span>
+                );
+              }
+              return renderSentencePart(child, i, depth + 1);
+            })}
+          </span>
+        );
+      }
+
       // Flat Mode: ROOT container (depth === 0) with height = 1
       if (isFlatMode && depth === 0) {
         return (
