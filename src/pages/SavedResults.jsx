@@ -15,6 +15,7 @@ function SavedResults() {
   const [lastVisible, setLastVisible] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [selectedResult, setSelectedResult] = useState(null);
+  const [activeDetailTab, setActiveDetailTab] = useState('original');
   const navigate = useNavigate();
 
   const PAGE_SIZE = 10;
@@ -146,7 +147,7 @@ function SavedResults() {
       <div className="saved-header">
         <h2>My Saved Analyses</h2>
         {selectedResult && (
-          <button onClick={() => setSelectedResult(null)} className="back-button">
+          <button onClick={() => { setSelectedResult(null); setActiveDetailTab('original'); }} className="back-button">
             &larr; Back to List
           </button>
         )}
@@ -158,12 +159,81 @@ function SavedResults() {
             <h3>{selectedResult.sentence}</h3>
             <p>Saved on: {selectedResult.createdAt?.toDate().toLocaleString()}</p>
           </div>
-          <ReadingAssistant
-            responseJSON={selectedResult.result}
-            showSaveButton={false}
-            showReAnalyzeButton={true}
-            onReAnalyze={(e) => handleReAnalyze(e, selectedResult.sentence)}
-          />
+          
+          {selectedResult.translateResults && selectedResult.translateResults.length > 0 ? (
+            <div className="analysis-tabs-wrapper">
+              <div className="analysis-tabs-header">
+                <button
+                  type="button"
+                  className={`tab-btn ${activeDetailTab === 'original' ? 'active' : ''}`}
+                  onClick={() => setActiveDetailTab('original')}
+                >
+                  Original (English)
+                </button>
+                {selectedResult.translateResults.map(trans => (
+                  <button
+                    key={trans.targetLang}
+                    type="button"
+                    className={`tab-btn ${activeDetailTab === `trans_${trans.targetLang}` ? 'active' : ''}`}
+                    onClick={() => setActiveDetailTab(`trans_${trans.targetLang}`)}
+                  >
+                    Translation ({trans.targetLang.toUpperCase()})
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  className={`tab-btn ${activeDetailTab === 'split' ? 'active' : ''}`}
+                  onClick={() => setActiveDetailTab('split')}
+                >
+                  Side-by-Side
+                </button>
+              </div>
+
+              <div className="tab-content">
+                {activeDetailTab === 'original' ? (
+                  <ReadingAssistant
+                    responseJSON={selectedResult.result}
+                    showSaveButton={false}
+                    showReAnalyzeButton={true}
+                    onReAnalyze={(e) => handleReAnalyze(e, selectedResult.sentence)}
+                  />
+                ) : activeDetailTab.startsWith('trans_') ? (
+                  <ReadingAssistant
+                    responseJSON={selectedResult.translateResults.find(t => `trans_${t.targetLang}` === activeDetailTab)?.analysis}
+                    showSaveButton={false}
+                    showReAnalyzeButton={false}
+                  />
+                ) : (
+                  <div className="split-view-container">
+                    <div className="split-pane">
+                      <h4 className="split-pane-title">Original (English)</h4>
+                      <ReadingAssistant
+                        responseJSON={selectedResult.result}
+                        showSaveButton={false}
+                        showReAnalyzeButton={true}
+                        onReAnalyze={(e) => handleReAnalyze(e, selectedResult.sentence)}
+                      />
+                    </div>
+                    <div className="split-pane">
+                      <h4 className="split-pane-title">Translation ({selectedResult.translateResults[0].targetLang.toUpperCase()})</h4>
+                      <ReadingAssistant
+                        responseJSON={selectedResult.translateResults[0].analysis}
+                        showSaveButton={false}
+                        showReAnalyzeButton={false}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <ReadingAssistant
+              responseJSON={selectedResult.result}
+              showSaveButton={false}
+              showReAnalyzeButton={true}
+              onReAnalyze={(e) => handleReAnalyze(e, selectedResult.sentence)}
+            />
+          )}
         </div>
       ) : (
         <>
@@ -182,7 +252,14 @@ function SavedResults() {
                 <div key={item.id} className="result-card" onClick={() => setSelectedResult(item)}>
                   <div className="card-header">
                     <span className="date">{item.createdAt?.toDate().toLocaleDateString()}</span>
-                    <span className="sentence-count">{item.result?.length || 0} sentences</span>
+                    <div className="header-badges">
+                      {item.translateResults && item.translateResults.length > 0 && (
+                        <span className="translation-badge" title="Translated Languages">
+                          🌐 {item.translateResults.map(t => t.targetLang.toUpperCase()).join(', ')}
+                        </span>
+                      )}
+                      <span className="sentence-count">{item.result?.length || 0} sents</span>
+                    </div>
                   </div>
                   <p className="card-text">
                     {item.sentence.length > 120 ? item.sentence.substring(0, 120) + '...' : item.sentence}

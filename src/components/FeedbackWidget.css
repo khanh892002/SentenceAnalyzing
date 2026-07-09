@@ -5,6 +5,17 @@
   z-index: 1000;
 }
 
+@media (max-width: 480px) {
+  .feedback-widget {
+    left: 20px;
+    right: 20px;
+  }
+
+  .feedback-dialog {
+    width: 100%;
+  }
+}
+
 .feedback-icon-btn {
   background-color: #3498db;
   color: white;

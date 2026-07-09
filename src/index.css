@@ -81,3 +81,114 @@ button:focus-visible {
     color: #1a1a1a;
   }
 }
+
+/* ===== Shared Page Layouts / Utilities ===== */
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  background: var(--panel-bg, #ffffff);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color, #eee);
+  width: 100%;
+}
+
+.empty-content {
+  text-align: center;
+  padding: 40px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.login-button {
+  margin-top: 20px;
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.login-button:hover {
+  background: #2980b9;
+}
+
+/* ===== Comparison Tab Control & Split Panes ===== */
+.analysis-tabs-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.analysis-tabs-header {
+  display: flex;
+  gap: 8px;
+  background-color: var(--phrase-bg, #f1f2f6);
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #eee);
+  margin-bottom: 15px;
+}
+
+.tab-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-color, #7f8c8d);
+}
+
+.tab-btn.active {
+  background-color: var(--panel-bg, #fff);
+  color: #3498db;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.split-view-container {
+  display: flex;
+  gap: 20px;
+  height: 100%;
+  align-items: stretch;
+}
+
+.split-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--border-color, #eee);
+  background-color: var(--panel-bg, #fff);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.split-pane-title {
+  margin: 0 0 10px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #3498db;
+  font-size: 15px;
+  color: #3498db;
+  text-align: center;
+}
+
+@media (max-width: 1024px) {
+  .split-view-container {
+    flex-direction: column;
+  }
+}
+

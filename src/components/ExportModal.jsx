@@ -3,9 +3,13 @@ import SentenceStructure from './SentenceStructure';
 
 function ExportModal({ data, isFlatMode, isFocusMode, onClose }) {
   const [exportWidth, setExportWidth] = useState(600);
+  const [fileName, setFileName] = useState(data.length > 1 ? 'document-analysis' : 'sentence-analysis');
   const exportRef = useRef(null);
 
-  const handleDownloadImage = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!fileName.trim()) return;
+
     if (exportRef.current) {
       try {
         const html2canvas = (await import('html2canvas')).default;
@@ -25,7 +29,13 @@ function ExportModal({ data, isFlatMode, isFocusMode, onClose }) {
 
         const dataUrl = canvas.toDataURL('image/png');
         const link = document.createElement('a');
-        link.download = data.length > 1 ? 'document-analysis.png' : 'sentence-analysis.png';
+        
+        let finalFileName = fileName.trim();
+        if (!finalFileName.toLowerCase().endsWith('.png')) {
+          finalFileName += '.png';
+        }
+
+        link.download = finalFileName;
         link.href = dataUrl;
         link.click();
         onClose();
@@ -39,47 +49,65 @@ function ExportModal({ data, isFlatMode, isFocusMode, onClose }) {
     <div className="modal-overlay">
       <div className="modal-content export-config-modal">
         <h3>Configure Export Image</h3>
-        <p className="modal-hint">Drag the container corner or use the slider to adjust the width before downloading.</p>
+        <p className="modal-hint">Enter the file name, adjust the width, and download.</p>
 
-        <div className="slider-container">
-          <label>Adjust Width: {exportWidth}px</label>
-          <input
-            type="range"
-            min="300"
-            max="1200"
-            value={exportWidth}
-            onChange={(e) => setExportWidth(Number(e.target.value))}
-            className="width-slider"
-          />
-        </div>
-
-        <div className="export-preview-wrapper">
-          <div
-            className="resizable-container"
-            style={{ width: `${exportWidth}px` }}
-            onMouseUp={(e) => setExportWidth(e.target.offsetWidth)}
-          >
-            <div ref={exportRef} className="export-capture-area vertical-export-list">
-              {data.map((tree, idx) => (
-                <div key={idx} className="export-sentence-block" style={{ marginBottom: idx < data.length - 1 ? '30px' : '0' }}>
-                  {data.length > 1 && (
-                    <div className="export-sentence-label" style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '14px', color: '#95a5a6' }}>Sentence {idx + 1}</div>
-                  )}
-                  <SentenceStructure
-                    data={[tree]}
-                    isFlatMode={isFlatMode}
-                    isFocusMode={isFocusMode}
-                  />
-                </div>
-              ))}
+        <form onSubmit={handleSubmit} className="export-form">
+          <div className="filename-input-container">
+            <label htmlFor="fileNameInput">File Name:</label>
+            <div className="input-group">
+              <input
+                id="fileNameInput"
+                type="text"
+                value={fileName}
+                onChange={(e) => setFileName(e.target.value)}
+                placeholder="Enter file name..."
+                required
+                className="filename-input"
+              />
+              <span className="file-extension">.png</span>
             </div>
           </div>
-        </div>
 
-        <div className="modal-actions">
-          <button onClick={onClose} className="cancel-button">Cancel</button>
-          <button onClick={handleDownloadImage} className="download-button">Download Image</button>
-        </div>
+          <div className="slider-container">
+            <label>Adjust Width: {exportWidth}px</label>
+            <input
+              type="range"
+              min="300"
+              max="1200"
+              value={exportWidth}
+              onChange={(e) => setExportWidth(Number(e.target.value))}
+              className="width-slider"
+            />
+          </div>
+
+          <div className="export-preview-wrapper">
+            <div
+              className="resizable-container"
+              style={{ width: `${exportWidth}px` }}
+              onMouseUp={(e) => setExportWidth(e.target.offsetWidth)}
+            >
+              <div ref={exportRef} className="export-capture-area vertical-export-list">
+                {data.map((tree, idx) => (
+                  <div key={idx} className="export-sentence-block" style={{ marginBottom: idx < data.length - 1 ? '30px' : '0' }}>
+                    {data.length > 1 && (
+                      <div className="export-sentence-label" style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '14px', color: '#95a5a6' }}>Sentence {idx + 1}</div>
+                    )}
+                    <SentenceStructure
+                      data={[tree]}
+                      isFlatMode={isFlatMode}
+                      isFocusMode={isFocusMode}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="modal-actions">
+            <button type="button" onClick={onClose} className="cancel-button">Cancel</button>
+            <button type="submit" className="download-button">Download Image</button>
+          </div>
+        </form>
       </div>
     </div>
   );
