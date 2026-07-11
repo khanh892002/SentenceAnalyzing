@@ -43,7 +43,6 @@ function SentencePhrase({ node, renderNode, isFocusMode }) {
   return (
     <span
       className={`part phrase ${node.pos} ${isCollapsed ? 'collapsed' : ''} ${isBlurred ? 'focus-blur' : ''}`}
-      style={{ '--h': isCollapsed ? 0 : node.height }}
       title={`${node.role} (${node.pos})`}
       onClick={toggleCollapse}
     >
@@ -61,17 +60,6 @@ function SentencePhrase({ node, renderNode, isFocusMode }) {
 }
 
 function SentenceStructure({ data, isFlatMode = false, isFocusMode = false }) {
-  // Recursively calculate nesting height for each node
-  const calculateHeights = (node) => {
-    if (!node.content || node.content.length === 0) {
-      node.height = 0;
-      return 0;
-    }
-    const childHeights = node.content.map(child => calculateHeights(child));
-    node.height = 1 + Math.max(...childHeights);
-    return node.height;
-  };
-
   // Extract all raw text from a node (for Flat Mode blocks)
   const extractRawText = (node) => {
     let words = [];
@@ -97,7 +85,7 @@ function SentenceStructure({ data, isFlatMode = false, isFocusMode = false }) {
         return (
           <span
             key={index}
-            className={`flat-leaf phrase-block ${node.pos} ${isBlurred ? 'focus-blur' : ''}`}
+            className={`part leaf flat-leaf phrase-block ${node.pos} ${isBlurred ? 'focus-blur' : ''}`}
             title={`${node.role} (${node.pos})`}
           >
             {extractRawText(node)}
@@ -108,8 +96,8 @@ function SentenceStructure({ data, isFlatMode = false, isFocusMode = false }) {
       // Handle Bracketed Clauses / Quotations
       if (node.type === 'bracket_group') {
         return (
-          <span 
-            key={index} 
+          <span
+            key={index}
             className={`part bracket-group ${isBlurred ? 'focus-blur' : ''}`}
             title={`${node.role} (Group)`}
           >
@@ -127,10 +115,10 @@ function SentenceStructure({ data, isFlatMode = false, isFocusMode = false }) {
         );
       }
 
-      // Flat Mode: ROOT container (depth === 0) with height = 1
+      // Flat Mode: ROOT container (depth === 0)
       if (isFlatMode && depth === 0) {
         return (
-          <span key={index} className="part phrase root-phrase" style={{ '--h': 1 }}>
+          <span key={index} className="part phrase root-phrase">
             {node.content.map((child, i) => renderSentencePart(child, i, depth + 1))}
           </span>
         );
@@ -139,12 +127,13 @@ function SentenceStructure({ data, isFlatMode = false, isFocusMode = false }) {
       return <SentencePhrase key={index} node={node} renderNode={(n, i) => renderSentencePart(n, i, depth + 1)} isFocusMode={isFocusMode} />;
     }
 
+
     // Leaf node
     if (isFlatMode) {
       return (
         <span
           key={index}
-          className={`flat-leaf ${node.pos} ${isBlurred ? 'focus-blur' : ''}`}
+          className={`part leaf flat-leaf ${node.pos} ${isBlurred ? 'focus-blur' : ''}`}
           title={`${node.role} (${node.pos})`}
         >
           {node.text}
@@ -156,7 +145,6 @@ function SentenceStructure({ data, isFlatMode = false, isFocusMode = false }) {
       <span
         key={index}
         className={`part leaf ${node.pos} ${isBlurred ? 'focus-blur' : ''}`}
-        style={{ '--h': 0 }}
         title={`${node.role} (${node.pos})`}
       >
         {node.text}
@@ -165,10 +153,7 @@ function SentenceStructure({ data, isFlatMode = false, isFocusMode = false }) {
   };
 
   const processedData = useMemo(() => {
-    if (!data) return [];
-    const clonedData = JSON.parse(JSON.stringify(data));
-    clonedData.forEach(part => calculateHeights(part));
-    return clonedData;
+    return data || [];
   }, [data]);
 
   return (
