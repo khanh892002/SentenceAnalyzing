@@ -123,20 +123,24 @@ function SavedResults() {
   const handleShare = async (e, item) => {
     e.stopPropagation();
     try {
-      if (!item.isPublic) {
-        const docRef = doc(db, 'analyses', item.id);
-        await updateDoc(docRef, { isPublic: true });
-        setAnalyses(prev => prev.map(a => a.id === item.id ? { ...a, isPublic: true } : a));
-      }
+      const docRef = doc(db, 'analyses', item.id);
+      const newIsPublic = !item.isPublic;
+      await updateDoc(docRef, { isPublic: newIsPublic });
+      setAnalyses(prev => prev.map(a => a.id === item.id ? { ...a, isPublic: newIsPublic } : a));
 
-      const shareUrl = `${window.location.origin}/share/${item.id}`;
-      await navigator.clipboard.writeText(shareUrl);
-      alert('Share link copied to clipboard!');
+      if (newIsPublic) {
+        const shareUrl = `${window.location.origin}/share/${item.id}`;
+        await navigator.clipboard.writeText(shareUrl);
+        alert('Analysis is now public! Share link copied to clipboard.');
+      } else {
+        alert('Analysis is now private. Shared link is disabled.');
+      }
     } catch (error) {
-      console.error("Error sharing document: ", error);
-      alert('Failed to generate share link.');
+      console.error("Error toggling share status: ", error);
+      alert('Failed to update share status.');
     }
   };
+
 
   if (loadingUser) return <div className="saved-container">Loading...</div>;
 
@@ -159,7 +163,7 @@ function SavedResults() {
             <h3>{selectedResult.sentence}</h3>
             <p>Saved on: {selectedResult.createdAt?.toDate().toLocaleString()}</p>
           </div>
-          
+
           {selectedResult.translateResults && selectedResult.translateResults.length > 0 ? (
             <div className="analysis-tabs-wrapper">
               <div className="analysis-tabs-header">

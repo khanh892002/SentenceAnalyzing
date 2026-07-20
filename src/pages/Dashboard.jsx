@@ -13,7 +13,7 @@ function Dashboard() {
   const location = useLocation();
   const [sentence, setSentence] = useState(location.state?.textToAnalyze || '');
   const [responseJSON, setResponseJSON] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
   const [cursorIndex, setCursorIndex] = useState(0);
