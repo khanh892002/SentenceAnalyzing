@@ -33,6 +33,7 @@ function SavedResults() {
       }
 
       if (currentUser) {
+        setLoading(true);
         // Real-time listener for the first page of analyses
         const q = query(
           collection(db, 'analyses'),
@@ -53,8 +54,10 @@ function SavedResults() {
           setAnalyses(liveAnalyses);
           setLastVisible(snapshot.docs[snapshot.docs.length - 1] ?? null);
           setHasMore(snapshot.docs.length === PAGE_SIZE);
+          setLoading(false);
         }, (error) => {
           console.error('Realtime listener error:', error);
+          setLoading(false);
         });
 
         unsubscribeSnapshotRef.current = unsub;
@@ -240,58 +243,65 @@ function SavedResults() {
           )}
         </div>
       ) : (
-        <>
-          {analyses.length === 0 && !loading ? (
-            <div className="empty-state">
-              <div className="empty-content">
-                <span className="empty-icon">📝</span>
-                <h2>No saved analyses yet</h2>
-                <p>Go to the Dashboard to analyze and save some sentences.</p>
-                <button onClick={() => navigate('/')} className="login-button">Go to Dashboard</button>
+        loading ? (
+          <div className="dots-container">
+            <div className="dot"></div>
+            <div className="dot"></div>
+            <div className="dot"></div>
+          </div>
+        ) : (
+          <>
+            {analyses.length === 0 && !loading ? (
+              <div className="empty-state">
+                <div className="empty-content">
+                  <span className="empty-icon">📝</span>
+                  <h2>No saved analyses yet</h2>
+                  <p>Go to the Dashboard to analyze and save some sentences.</p>
+                  <button onClick={() => navigate('/')} className="login-button">Go to Dashboard</button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="results-grid">
-              {analyses.map(item => (
-                <div key={item.id} className="result-card" onClick={() => setSelectedResult(item)}>
-                  <div className="card-header">
-                    <span className="date">{item.createdAt?.toDate().toLocaleDateString()}</span>
-                    <div className="header-badges">
-                      {item.translateResults && item.translateResults.length > 0 && (
-                        <span className="translation-badge" title="Translated Languages">
-                          🌐 {item.translateResults.map(t => t.targetLang.toUpperCase()).join(', ')}
-                        </span>
-                      )}
-                      <span className="sentence-count">{item.result?.length || 0} sents</span>
+            ) : (
+              <div className="results-grid">
+                {analyses.map(item => (
+                  <div key={item.id} className="result-card" onClick={() => setSelectedResult(item)}>
+                    <div className="card-header">
+                      <span className="date">{item.createdAt?.toDate().toLocaleDateString()}</span>
+                      <div className="header-badges">
+                        {item.translateResults && item.translateResults.length > 0 && (
+                          <span className="translation-badge" title="Translated Languages">
+                            🌐 {item.translateResults.map(t => t.targetLang.toUpperCase()).join(', ')}
+                          </span>
+                        )}
+                        <span className="sentence-count">{item.result?.length || 0} sents</span>
+                      </div>
+                    </div>
+                    <p className="card-text">
+                      {item.sentence.length > 120 ? item.sentence.substring(0, 120) + '...' : item.sentence}
+                    </p>
+                    <div className="card-actions">
+                      <button className="card-btn share-btn" onClick={(e) => handleShare(e, item)} title="Copy Share Link">
+                        {item.isPublic ? '🔗 Shared' : 'Share'}
+                      </button>
+                      <button className="card-btn reanalyze-btn" onClick={(e) => handleReAnalyze(e, item.sentence)}>
+                        Re-analyze
+                      </button>
+                      <button className="card-btn delete-btn" onClick={(e) => handleDelete(e, item.id)}>
+                        Delete
+                      </button>
                     </div>
                   </div>
-                  <p className="card-text">
-                    {item.sentence.length > 120 ? item.sentence.substring(0, 120) + '...' : item.sentence}
-                  </p>
-                  <div className="card-actions">
-                    <button className="card-btn share-btn" onClick={(e) => handleShare(e, item)} title="Copy Share Link">
-                      {item.isPublic ? '🔗 Shared' : 'Share'}
-                    </button>
-                    <button className="card-btn reanalyze-btn" onClick={(e) => handleReAnalyze(e, item.sentence)}>
-                      Re-analyze
-                    </button>
-                    <button className="card-btn delete-btn" onClick={(e) => handleDelete(e, item.id)}>
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
 
-          {hasMore && analyses.length > 0 && (
-            <div className="load-more-container">
-              <button onClick={loadMoreAnalyses} disabled={loading} className="load-more-btn">
-                {loading ? 'Loading...' : 'Load More'}
-              </button>
-            </div>
-          )}
-        </>
+            {hasMore && analyses.length > 0 && (
+              <div className="load-more-container">
+                <button onClick={loadMoreAnalyses} disabled={loading} className="load-more-btn">
+                  {loading ? 'Loading...' : 'Load More'}
+                </button>
+              </div>
+            )}
+          </>)
       )}
     </div>
   );
