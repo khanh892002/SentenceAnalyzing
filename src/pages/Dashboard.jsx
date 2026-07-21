@@ -13,7 +13,7 @@ function Dashboard() {
   const location = useLocation();
   const [sentence, setSentence] = useState(location.state?.textToAnalyze || '');
   const [responseJSON, setResponseJSON] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
   const [cursorIndex, setCursorIndex] = useState(0);
@@ -445,7 +445,7 @@ function Dashboard() {
               <div className="skeleton-box"></div>
               <div className="skeleton-line medium" style={{ marginLeft: '20px' }}></div>
               <div className="skeleton-box" style={{ marginLeft: '40px' }}></div>
-              <div className="skeleton-line long" style={{ marginLeft: '20px' }}></div>
+              <div className="skeleton-line" style={{ marginLeft: '20px' }}></div>
             </div>
           )}
           {!loading && responseJSON && (

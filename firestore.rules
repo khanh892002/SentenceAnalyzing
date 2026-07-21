@@ -18,6 +18,11 @@ service cloud.firestore {
       allow read, write: if false; 
     }
 
+    // Translation cache
+    match /global_translation_cache/{document=**} {
+      allow read, write: if false; 
+    }
+
     match /feedbacks/{feedbackId} {
       // Anyone (including unauthenticated users) can submit feedback
       allow create: if true;
